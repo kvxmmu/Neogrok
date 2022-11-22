@@ -1,0 +1,14 @@
+[compression]
+algorithm = "Deflate"
+level = 10
+
+[database]
+url = "sqlite:///db.sqlite"
+
+[server]
+listen = "0.0.0.0:6567"
+name = "NeoGrok 1.0-release"
+
+workers = 10
+
+magic = "simple-magic"

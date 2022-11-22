@@ -1,0 +1,15 @@
+[workspace]
+members = ["idpool", "neogrokd", "config", "deflate", "zstd", "neogrok"]
+
+[workspace.dependencies]
+num = "0.4.0"
+url = { version = "2.3.1", features = ["serde"] }
+
+log = "0.4.17"
+tokio = { version = "1.22.0", default-features = false, features = [
+    "net",
+    "rt",
+    "rt-multi-thread",
+    "macros",
+    "io-util",
+] }
