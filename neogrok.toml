@@ -18,6 +18,8 @@ buffer = { read = 1024 }
 workers = 10
 magic = "simple-magic"
 
+bind_host = "0.0.0.0"
+
 [permissions.base]
 can_create_tcp = false
 can_create_udp = false

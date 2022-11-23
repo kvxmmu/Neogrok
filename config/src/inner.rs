@@ -69,6 +69,8 @@ pub struct ServerConfig {
     pub workers: usize,
 
     pub buffer: TcpBufferCapacity,
+
+    pub bind_host: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]

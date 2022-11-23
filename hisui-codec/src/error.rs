@@ -9,6 +9,9 @@ pub enum ReadError {
 
     UnknownPacket { packet: u8, flags: PacketFlags },
     UnknownErrorVariant,
+    InvalidRightsFlags,
+
+    InvalidString,
 }
 
 impl From<io::Error> for ReadError {

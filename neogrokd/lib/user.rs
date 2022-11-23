@@ -10,6 +10,10 @@ pub struct User {
 }
 
 impl User {
+    pub fn promote_to(&mut self, to: Rights) {
+        self.permissions = to;
+    }
+
     pub const fn new(address: SocketAddr, permissions: Rights) -> Self {
         Self {
             address,

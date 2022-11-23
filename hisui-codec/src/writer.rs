@@ -2,7 +2,14 @@ use {
     crate::protocol::{
         encode_type,
         flags::PacketFlags,
-        frame::Frame,
+        frame::{
+            Frame,
+            ProtocolError,
+        },
+    },
+    common_codec::{
+        permissions::Rights,
+        Protocol,
     },
     std::{
         future::Future,
@@ -22,6 +29,69 @@ impl<Writer> HisuiWriter<Writer>
 where
     Writer: AsyncWriteExt + Unpin,
 {
+    pub async fn request_server(
+        &mut self,
+        port: u16,
+        protocol: Protocol,
+    ) -> io::Result<()> {
+        let mut flags = PacketFlags::empty();
+        let mut buffer = [0; 4];
+        let mut offset = 1;
+
+        if port == 0 {
+            flags |= PacketFlags::SHORT;
+        } else {
+            buffer[1] = (port & 0xff) as u8;
+            buffer[2] = (port >> 8) as u8;
+
+            offset += 2;
+        }
+
+        if protocol == Protocol::Tcp {
+            flags |= PacketFlags::SHORT2;
+        } else {
+            buffer[offset] = protocol as u8;
+            offset += 1;
+        }
+
+        buffer[0] = encode_type(Frame::START_SERVER, flags);
+        self.inner.write_all(&buffer[..offset]).await
+    }
+
+    pub async fn respond_server(&mut self, port: u16) -> io::Result<()> {
+        self.inner
+            .write_all(&[
+                encode_type(Frame::START_SERVER, PacketFlags::empty()),
+                (port & 0xff) as u8,
+                (port >> 8) as u8,
+            ])
+            .await
+    }
+
+    pub async fn respond_update_rights(
+        &mut self,
+        rights: Rights,
+    ) -> io::Result<()> {
+        self.inner
+            .write_all(&[
+                encode_type(Frame::UPDATE_RIGHTS, PacketFlags::empty()),
+                rights.bits(),
+            ])
+            .await
+    }
+
+    pub async fn respond_error(
+        &mut self,
+        error: ProtocolError,
+    ) -> io::Result<()> {
+        self.inner
+            .write_all(&[
+                encode_type(Frame::ERROR, PacketFlags::empty()),
+                error as u8,
+            ])
+            .await
+    }
+
     pub async fn respond_ping(&mut self, data: &[u8]) -> io::Result<()> {
         self.write_vectored(
             &[
@@ -57,12 +127,14 @@ where
             match written {
                 _ if written == total => break Ok(()),
                 prep_in_progress if written < prepend.len() => {
-                    prepend_io = IoSlice::new(&prepend[prep_in_progress..]);
+                    prepend_io =
+                        IoSlice::new(&prepend[prep_in_progress..]);
                 }
 
                 buffer_in_progress if written >= prepend.len() => {
-                    buffer_io =
-                        IoSlice::new(&buffer[buffer_in_progress - prep_len..]);
+                    buffer_io = IoSlice::new(
+                        &buffer[buffer_in_progress - prep_len..],
+                    );
                 }
 
                 _ => {}

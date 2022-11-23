@@ -4,4 +4,10 @@ pub enum Protocol {
     Udp = 1,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CodecSide {
+    Client,
+    Server,
+}
+
 pub mod permissions;

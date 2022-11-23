@@ -9,7 +9,11 @@ use {
             },
         },
     },
-    common_codec::Protocol,
+    common_codec::{
+        permissions::Rights,
+        CodecSide,
+        Protocol,
+    },
     std::{
         future::Future,
         io,
@@ -19,6 +23,7 @@ use {
 
 pub struct HisuiReader<Reader> {
     inner: Reader,
+    side: CodecSide,
 }
 
 impl<Reader> HisuiReader<Reader>
@@ -31,7 +36,10 @@ where
         self.inner.read_u8()
     }
 
-    pub async fn read_frame(&mut self, pk: u8) -> Result<Frame, ReadError> {
+    pub async fn read_frame(
+        &mut self,
+        pk: u8,
+    ) -> Result<Frame, ReadError> {
         const fn decode_pkt_type(pkt_type: u8) -> (u8, PacketFlags) {
             let Some(flags) = PacketFlags::from_bits(pkt_type & 0b111) else {
                 unreachable!()
@@ -42,6 +50,14 @@ where
 
         let (pkt_type, flags) = decode_pkt_type(pk);
         Ok(match pkt_type {
+            Frame::UPDATE_RIGHTS => {
+                let flags = self.inner.read_u8().await?;
+                Frame::UpdateRights {
+                    rights: Rights::from_bits(flags)
+                        .ok_or(ReadError::InvalidRightsFlags)?,
+                }
+            }
+
             Frame::ERROR => {
                 let error_code = self.inner.read_u8().await?;
                 Frame::Error(
@@ -49,22 +65,36 @@ where
                         .map_err(|_| ReadError::UnknownErrorVariant)?,
                 )
             }
-            Frame::PING => Frame::Ping,
-            Frame::START_SERVER => Frame::StartServer {
-                port: if flags.intersects(PacketFlags::SHORT) {
-                    0
-                } else {
-                    self.inner.read_u16_le().await?
-                },
-                protocol: if flags.intersects(PacketFlags::SHORT2) {
-                    Protocol::Tcp
-                } else {
-                    Protocol::Udp
-                },
-            },
+
+            Frame::PING if self.side == CodecSide::Server => Frame::Ping,
+            Frame::PING if self.side == CodecSide::Client => {
+                Frame::PingResponse {
+                    name: self.read_string().await?,
+                }
+            }
+
+            Frame::START_SERVER if self.side == CodecSide::Server => {
+                Frame::StartServer {
+                    port: if flags.intersects(PacketFlags::SHORT) {
+                        0
+                    } else {
+                        self.inner.read_u16_le().await?
+                    },
+                    protocol: if flags.intersects(PacketFlags::SHORT2) {
+                        Protocol::Tcp
+                    } else {
+                        Protocol::Udp
+                    },
+                }
+            }
+            Frame::START_SERVER if self.side == CodecSide::Client => {
+                Frame::StartServerResponse {
+                    port: self.inner.read_u16_le().await?,
+                }
+            }
 
             Frame::AUTH_THROUGH_MAGIC => Frame::AuthThroughMagic {
-                magic: self.read_string().await?,
+                magic: self.read_buffer_prefixed().await?,
             },
 
             _ => {
@@ -76,7 +106,12 @@ where
         })
     }
 
-    async fn read_string(&mut self) -> io::Result<Vec<u8>> {
+    async fn read_string(&mut self) -> Result<String, ReadError> {
+        let data = self.read_buffer_prefixed().await?;
+        String::from_utf8(data).map_err(|_| ReadError::InvalidString)
+    }
+
+    async fn read_buffer_prefixed(&mut self) -> io::Result<Vec<u8>> {
         let length = self.inner.read_u8().await?;
         let mut buffer = vec![0; length as _];
         self.inner
@@ -85,7 +120,15 @@ where
             .map(move |_| buffer)
     }
 
-    pub fn new(inner: Reader) -> Self {
-        Self { inner }
+    pub const fn client(inner: Reader) -> Self {
+        Self::new(inner, CodecSide::Client)
+    }
+
+    pub const fn server(inner: Reader) -> Self {
+        Self::new(inner, CodecSide::Server)
+    }
+
+    pub const fn new(inner: Reader, side: CodecSide) -> Self {
+        Self { inner, side }
     }
 }

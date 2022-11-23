@@ -52,8 +52,9 @@ fn configure_logger(cfg: &LoggingConfig) {
         .level(cfg.level.into_log())
         .chain(std::io::stderr());
     for file in &cfg.files {
-        dispatch = dispatch
-            .chain(fern::log_file(file).expect("Failed to create log file"));
+        dispatch = dispatch.chain(
+            fern::log_file(file).expect("Failed to create log file"),
+        );
     }
 
     dispatch.apply().expect("Failed to setup logging");

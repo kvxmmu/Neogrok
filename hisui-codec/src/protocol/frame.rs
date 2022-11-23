@@ -1,5 +1,8 @@
 use {
-    common_codec::Protocol,
+    common_codec::{
+        permissions::Rights,
+        Protocol,
+    },
     std::mem,
 };
 
@@ -12,6 +15,21 @@ pub enum ProtocolError {
     /// Sent invalid error code
     InvalidErrorCode = 1,
 
+    ///
+    ServerIsNotStarted = 2,
+
+    /// Client has no access to perform action
+    AccessDenied = 3,
+
+    ///
+    MagicAuthIsTurnedOff = 4,
+
+    ///
+    ServerIsAlreadyCreated = 5,
+
+    ///
+    FailedToBindPort = 6,
+
     /// Reserved error code
     Reserved,
 }
@@ -19,11 +37,15 @@ pub enum ProtocolError {
 #[derive(Debug, Clone)]
 pub enum Frame {
     Ping,
+    PingResponse { name: String },
 
     StartServer { port: u16, protocol: Protocol },
     StartHttpServer,
 
+    StartServerResponse { port: u16 },
+
     AuthThroughMagic { magic: Vec<u8> },
+    UpdateRights { rights: Rights },
 
     Error(ProtocolError),
 }
@@ -36,6 +58,7 @@ impl Frame {
     pub const ERROR: u8              = 3;
 
     pub const AUTH_THROUGH_MAGIC: u8 = 4;
+    pub const UPDATE_RIGHTS: u8      = 5;
 }
 
 impl TryFrom<u8> for ProtocolError {

@@ -15,6 +15,7 @@ path = "src/main.rs"
 
 [dependencies]
 config = { path = "../config" }
+idpool = { path = "../idpool" }
 
 hisui-codec = { path = "../hisui-codec" }
 medusa-codec = { path = "../medusa-codec" }
