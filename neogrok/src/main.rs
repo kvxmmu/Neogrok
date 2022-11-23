@@ -1,4 +1,8 @@
-use std::env;
+use {
+    clap::Parser,
+    client::args::Args,
+    std::env,
+};
 
 static ENV_LOGLEVEL: &str = "NEOGROK_LOGLEVEL";
 
@@ -8,5 +12,6 @@ fn main() {
     }
     pretty_env_logger::init_custom_env(ENV_LOGLEVEL);
 
-    log::info!("Hello world");
+    let args = Args::parse();
+    dbg!(args);
 }

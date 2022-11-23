@@ -15,6 +15,9 @@ path = "src/main.rs"
 
 [dependencies]
 config = { path = "../config" }
+
+hisui-codec = { path = "../hisui-codec" }
+medusa-codec = { path = "../medusa-codec" }
 common-codec = { path = "../common-codec" }
 
 fern = { version = "0.6.1", features = ["chrono"] }
@@ -22,3 +25,4 @@ chrono = { version = "0.4.23", default-features = false }
 
 tokio = { workspace = true }
 log = { workspace = true }
+kanal = { workspace = true }

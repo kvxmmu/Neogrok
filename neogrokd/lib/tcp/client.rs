@@ -1,6 +1,10 @@
 use {
     crate::user::User,
     config::Config,
+    hisui_codec::{
+        reader::HisuiReader,
+        writer::HisuiWriter,
+    },
     std::{
         io,
         sync::Arc,
@@ -15,12 +19,15 @@ pub async fn listen_client<Reader, Writer>(
     config: Arc<Config>,
     user: User,
 
-    mut reader: Reader,
+    reader: Reader,
     writer: Writer,
 ) -> io::Result<()>
 where
     Reader: AsyncReadExt + Unpin,
-    Writer: AsyncWriteExt,
+    Writer: AsyncWriteExt + Unpin,
 {
+    let (mut reader, mut writer) =
+        (HisuiReader::new(reader), HisuiWriter::new(writer));
+
     Ok(())
 }
