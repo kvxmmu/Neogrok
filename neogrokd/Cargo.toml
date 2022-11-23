@@ -15,6 +15,10 @@ path = "src/main.rs"
 
 [dependencies]
 config = { path = "../config" }
+common-codec = { path = "../common-codec" }
+
+fern = { version = "0.6.1", features = ["chrono"] }
+chrono = { version = "0.4.23", default-features = false }
 
 tokio = { workspace = true }
 log = { workspace = true }

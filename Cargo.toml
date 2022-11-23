@@ -1,11 +1,23 @@
 [workspace]
-members = ["idpool", "neogrokd", "config", "deflate", "zstd", "neogrok"]
+members = [
+    "idpool",
+    "neogrokd",
+    "config",
+    "deflate",
+    "zstd",
+    "neogrok",
+    "medusa-codec",
+    "hisui-codec",
+    "common-codec",
+]
 
 [workspace.dependencies]
 num = "0.4.0"
 url = { version = "2.3.1", features = ["serde"] }
 
 log = "0.4.17"
+byteorder = "1.4.3"
+
 tokio = { version = "1.22.0", default-features = false, features = [
     "net",
     "rt",
