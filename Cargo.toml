@@ -19,8 +19,10 @@ members = [
 num = "0.4.0"
 url = { version = "2.3.1", features = ["serde"] }
 
+smol_str = "0.1.23"
 log = "0.4.17"
 byteorder = "1.4.3"
+bitflags = "1.3.2"
 
 kanal = "0.1.0-pre7"
 tokio = { version = "1.22.0", default-features = false, features = [

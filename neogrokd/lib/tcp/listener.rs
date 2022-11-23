@@ -38,9 +38,15 @@ pub async fn listen_to(config: Arc<Config>) -> io::Result<()> {
             log::info!("{address} Connected to the main server");
 
             let rights = config.permissions.base.into_rights();
-            listen_client(config, User::new(address, rights), reader, writer)
-                .await
-                .unwrap_or_default();
+            listen_client(
+                config,
+                User::new(address, rights),
+                reader,
+                writer,
+                address,
+            )
+            .await
+            .unwrap_or_default();
 
             log::info!("{address} Disconnected from the main server");
         });

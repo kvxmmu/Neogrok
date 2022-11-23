@@ -8,5 +8,7 @@ edition = "2021"
 [dependencies]
 byteorder = { workspace = true }
 tokio = { workspace = true }
+bitflags = { workspace = true }
+smol_str = { workspace = true }
 
 common-codec = { path = "../common-codec" }
