@@ -29,6 +29,43 @@ impl<Writer> HisuiWriter<Writer>
 where
     Writer: AsyncWriteExt + Unpin,
 {
+    pub fn write_connected(
+        &mut self,
+        id: u16,
+    ) -> impl Future<Output = io::Result<()>> + '_ {
+        self.write_client_id_pkt(id, Frame::CONNECTED)
+    }
+
+    pub fn write_disconnected(
+        &mut self,
+        id: u16,
+    ) -> impl Future<Output = io::Result<()>> + '_ {
+        self.write_client_id_pkt(id, Frame::DISCONNECTED)
+    }
+
+    async fn write_client_id_pkt(
+        &mut self,
+        id: u16,
+        pkt_type: u8,
+    ) -> io::Result<()> {
+        if id <= 0xff {
+            self.inner
+                .write_all(&[
+                    encode_type(pkt_type, PacketFlags::SHORT2),
+                    id as u8,
+                ])
+                .await
+        } else {
+            self.inner
+                .write_all(&[
+                    encode_type(pkt_type, PacketFlags::empty()),
+                    (id & 0xff) as u8,
+                    (id >> 8) as u8,
+                ])
+                .await
+        }
+    }
+
     pub async fn request_server(
         &mut self,
         port: u16,

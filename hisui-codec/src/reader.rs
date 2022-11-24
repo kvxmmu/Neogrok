@@ -97,6 +97,13 @@ where
                 magic: self.read_buffer_prefixed().await?,
             },
 
+            Frame::CONNECTED => Frame::Connected {
+                id: self.read_client_id(flags).await?,
+            },
+            Frame::DISCONNECTED => Frame::Disconnected {
+                id: self.read_client_id(flags).await?,
+            },
+
             _ => {
                 return Err(ReadError::UnknownPacket {
                     packet: pkt_type,
@@ -104,6 +111,17 @@ where
                 })
             }
         })
+    }
+
+    async fn read_client_id(
+        &mut self,
+        flags: PacketFlags,
+    ) -> io::Result<u16> {
+        if flags.intersects(PacketFlags::SHORT2) {
+            self.inner.read_u8().await.map(|v| v as _)
+        } else {
+            self.inner.read_u16_le().await
+        }
     }
 
     async fn read_string(&mut self) -> Result<String, ReadError> {

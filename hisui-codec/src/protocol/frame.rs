@@ -50,6 +50,10 @@ pub enum Frame {
     AuthThroughMagic { magic: Vec<u8> },
     UpdateRights { rights: Rights },
 
+    // Tcp
+    Connected { id: u16 },
+    Disconnected { id: u16 },
+    //
     Error(ProtocolError),
 }
 
@@ -62,6 +66,9 @@ impl Frame {
 
     pub const AUTH_THROUGH_MAGIC: u8 = 4;
     pub const UPDATE_RIGHTS: u8      = 5;
+    
+    pub const DISCONNECTED: u8       = 6;
+    pub const CONNECTED: u8          = 7;
 }
 
 impl TryFrom<u8> for ProtocolError {
