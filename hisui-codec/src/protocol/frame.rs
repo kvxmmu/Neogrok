@@ -30,6 +30,9 @@ pub enum ProtocolError {
     ///
     FailedToBindPort = 6,
 
+    ///
+    NoSuchClient = 7,
+
     /// Reserved error code
     Reserved,
 }

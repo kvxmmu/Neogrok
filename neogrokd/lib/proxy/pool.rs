@@ -1,14 +1,13 @@
 use {
     super::{
         command::ProxyCommand,
-        error::SendError,
+        error::{
+            RemoveError,
+            SendError,
+        },
     },
     idpool::flat::FlatIdPool,
-    kanal::{
-        unbounded_async,
-        AsyncReceiver,
-        AsyncSender,
-    },
+    kanal::AsyncSender,
     std::{
         collections::HashMap,
         sync::Arc,
@@ -27,19 +26,24 @@ pub struct ProxyPool {
 }
 
 impl ProxyPool {
-    pub async fn create_client(
+    pub fn clone_id_pool(&self) -> Arc<Mutex<FlatIdPool<u16>>> {
+        Arc::clone(&self.pool)
+    }
+
+    pub fn remove_client(&mut self, id: u16) -> Result<(), RemoveError> {
+        if self.map.remove(&id).is_some() {
+            Ok(())
+        } else {
+            Err(RemoveError::ClientDoesNotExists)
+        }
+    }
+
+    pub fn create_client(
         &mut self,
-    ) -> (AsyncReceiver<ProxyCommand>, IdResource) {
-        let id = self.pool.lock().await.request_id();
-        let resource = IdResource {
-            id,
-            pool: Arc::clone(&self.pool),
-        };
-
-        let (tx, rx) = unbounded_async();
+        id: u16,
+        tx: AsyncSender<ProxyCommand>,
+    ) {
         self.map.insert(id, tx);
-
-        (rx, resource)
     }
 
     pub async fn send_to(

@@ -1,6 +1,11 @@
 use std::io;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RemoveError {
+    ClientDoesNotExists,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SendError {
     NotFound,
     Closed,

@@ -1,23 +1,22 @@
 use {
-    crate::proxy::command::{
-        MasterCommand,
-        ShutdownToken,
+    crate::proxy::{
+        command::{
+            MasterCommand,
+            ShutdownToken,
+        },
+        pool::ProxyPool,
     },
-    idpool::prelude::FlatIdPool,
     kanal::{
         unbounded_async,
         AsyncReceiver,
         AsyncSender,
     },
-    std::sync::Arc,
-    tokio::sync::{
-        oneshot,
-        Mutex,
-    },
+    std::future::Future,
+    tokio::sync::oneshot,
 };
 
 pub struct State {
-    pub pool: Arc<Mutex<FlatIdPool<u16>>>,
+    pub pool: ProxyPool,
 
     trigger: oneshot::Sender<ShutdownToken>,
     tx: AsyncSender<MasterCommand>,
@@ -25,6 +24,13 @@ pub struct State {
 }
 
 impl State {
+    pub fn recv_command(
+        &self,
+    ) -> impl Future<Output = Result<MasterCommand, kanal::ReceiveError>> + '_
+    {
+        self.rx.recv()
+    }
+
     pub fn trigger_shutdown(self) {
         self.trigger
             .send(ShutdownToken)
@@ -39,7 +45,7 @@ impl State {
             Self {
                 trigger: otx,
 
-                pool: Arc::new(FlatIdPool::zero().into()),
+                pool: ProxyPool::default(),
                 tx,
                 rx,
             },

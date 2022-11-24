@@ -7,9 +7,11 @@ use std::{
     },
 };
 
+pub enum Never {}
+
 pub struct InfiniteFuture;
 impl Future for InfiniteFuture {
-    type Output = ();
+    type Output = Never;
 
     fn poll(
         self: Pin<&mut Self>,
