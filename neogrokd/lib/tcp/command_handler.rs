@@ -19,6 +19,10 @@ where
     Writer: AsyncWriteExt + Unpin,
 {
     match command {
+        MasterCommand::Forward { id, buffer } => {
+            writer.write_forward(id, &buffer).await?;
+        }
+
         MasterCommand::Connected { tx, id } => {
             state.pool.create_client(id, tx);
         }
@@ -26,7 +30,7 @@ where
         MasterCommand::Disconnected { id } => {
             match state.pool.remove_client(id) {
                 Ok(()) => {
-                    todo!()
+                    writer.write_disconnected(id).await?;
                 }
 
                 Err(_) => {
