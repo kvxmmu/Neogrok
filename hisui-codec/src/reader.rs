@@ -17,8 +17,16 @@ use {
     std::{
         future::Future,
         io,
+        pin::Pin,
     },
-    tokio::io::AsyncReadExt,
+    tokio::{
+        io::{
+            AsyncRead,
+            AsyncReadExt,
+            ReadBuf,
+        },
+        macros::support::poll_fn,
+    },
 };
 
 pub struct HisuiReader<Reader> {
@@ -28,7 +36,7 @@ pub struct HisuiReader<Reader> {
 
 impl<Reader> HisuiReader<Reader>
 where
-    Reader: AsyncReadExt + Unpin,
+    Reader: AsyncReadExt + AsyncRead + Unpin,
 {
     pub fn read_pkt_type(
         &mut self,
@@ -50,6 +58,26 @@ where
 
         let (pkt_type, flags) = decode_pkt_type(pk);
         Ok(match pkt_type {
+            Frame::FORWARD => {
+                let id = self.read_client_id(flags).await?;
+                let length = self.read_length(flags).await? as usize;
+
+                let mut buffer = Vec::with_capacity(length);
+                let mut rd_buffer =
+                    ReadBuf::uninit(buffer.spare_capacity_mut());
+
+                while rd_buffer.filled().len() < length {
+                    poll_fn(|cx| {
+                        Pin::new(&mut self.inner)
+                            .poll_read(cx, &mut rd_buffer)
+                    })
+                    .await?;
+                }
+
+                unsafe { buffer.set_len(length) };
+
+                Frame::Forward { id, buffer }
+            }
             Frame::UPDATE_RIGHTS => {
                 let flags = self.inner.read_u8().await?;
                 Frame::UpdateRights {
@@ -113,15 +141,30 @@ where
         })
     }
 
-    async fn read_client_id(
+    async fn read_variadic(
         &mut self,
         flags: PacketFlags,
+        need_flags: PacketFlags,
     ) -> io::Result<u16> {
-        if flags.intersects(PacketFlags::SHORT2) {
+        if flags.contains(need_flags) {
             self.inner.read_u8().await.map(|v| v as _)
         } else {
             self.inner.read_u16_le().await
         }
+    }
+
+    fn read_length(
+        &mut self,
+        flags: PacketFlags,
+    ) -> impl Future<Output = io::Result<u16>> + '_ {
+        self.read_variadic(flags, PacketFlags::SHORT)
+    }
+
+    fn read_client_id(
+        &mut self,
+        flags: PacketFlags,
+    ) -> impl Future<Output = io::Result<u16>> + '_ {
+        self.read_variadic(flags, PacketFlags::SHORT2)
     }
 
     async fn read_string(&mut self) -> Result<String, ReadError> {

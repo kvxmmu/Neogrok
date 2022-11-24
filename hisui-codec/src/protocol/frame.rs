@@ -52,6 +52,7 @@ pub enum Frame {
 
     // Tcp
     Connected { id: u16 },
+    Forward { id: u16, buffer: Vec<u8> },
     Disconnected { id: u16 },
     //
     Error(ProtocolError),
@@ -66,9 +67,10 @@ impl Frame {
 
     pub const AUTH_THROUGH_MAGIC: u8 = 4;
     pub const UPDATE_RIGHTS: u8      = 5;
-    
+
     pub const DISCONNECTED: u8       = 6;
     pub const CONNECTED: u8          = 7;
+    pub const FORWARD: u8            = 8;
 }
 
 impl TryFrom<u8> for ProtocolError {

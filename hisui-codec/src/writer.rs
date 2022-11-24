@@ -29,6 +29,46 @@ impl<Writer> HisuiWriter<Writer>
 where
     Writer: AsyncWriteExt + Unpin,
 {
+    pub async fn write_forward(
+        &mut self,
+        id: u16,
+        buffer: &[u8],
+    ) -> io::Result<()> {
+        let mut flags = PacketFlags::empty();
+        let mut hdr = [0u8; 4];
+        let mut offset = 1;
+        let buf_len = buffer.len();
+
+        offset += if id <= 0xff {
+            flags |= PacketFlags::SHORT2;
+            hdr[offset] = id as _;
+
+            1
+        } else {
+            hdr[offset] = (id & 0xff) as _;
+            hdr[offset + 1] = (id >> 8) as _;
+
+            2
+        };
+
+        offset += if buf_len <= 0xff {
+            flags |= PacketFlags::SHORT;
+            hdr[offset] = buf_len as _;
+
+            1
+        } else {
+            hdr[offset] = (buf_len & 0xff) as _;
+            hdr[offset + 1] = (buf_len >> 8) as _;
+
+            2
+        };
+
+        hdr[0] = encode_type(Frame::FORWARD, flags);
+
+        // TODO: implement compression
+        self.write_vectored(&hdr[..offset], buffer).await
+    }
+
     pub fn write_connected(
         &mut self,
         id: u16,
@@ -75,21 +115,26 @@ where
         let mut buffer = [0; 4];
         let mut offset = 1;
 
-        if port == 0 {
+        offset += if port == 0 {
             flags |= PacketFlags::SHORT;
+
+            0
         } else {
             buffer[1] = (port & 0xff) as u8;
             buffer[2] = (port >> 8) as u8;
 
-            offset += 2;
-        }
+            2
+        };
 
-        if protocol == Protocol::Tcp {
+        offset += if protocol == Protocol::Tcp {
             flags |= PacketFlags::SHORT2;
+
+            0
         } else {
             buffer[offset] = protocol as u8;
-            offset += 1;
-        }
+
+            1
+        };
 
         buffer[0] = encode_type(Frame::START_SERVER, flags);
         self.inner.write_all(&buffer[..offset]).await
