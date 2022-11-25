@@ -1,13 +1,13 @@
 use {
     super::error::SendError,
     crate::slave::commands::SlaveCommand,
-    std::collections::HashMap,
+    rustc_hash::FxHashMap,
     tokio::sync::mpsc::UnboundedSender,
 };
 
 #[derive(Debug, Default)]
 pub struct ClientsPool {
-    map: HashMap<u16, UnboundedSender<SlaveCommand>>,
+    map: FxHashMap<u16, UnboundedSender<SlaveCommand>>,
 }
 
 impl ClientsPool {

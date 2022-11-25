@@ -25,3 +25,5 @@ chrono = { version = "0.4.23", default-features = false }
 
 tokio = { workspace = true }
 log = { workspace = true }
+
+rustc-hash = { workspace = true }

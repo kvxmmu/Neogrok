@@ -7,10 +7,8 @@ use {
         },
     },
     idpool::flat::FlatIdPool,
-    std::{
-        collections::HashMap,
-        sync::Arc,
-    },
+    rustc_hash::FxHashMap,
+    std::sync::Arc,
     tokio::sync::{
         mpsc::UnboundedSender,
         Mutex,
@@ -23,7 +21,7 @@ pub struct IdResource {
 }
 
 pub struct ProxyPool {
-    map: HashMap<u16, UnboundedSender<ProxyCommand>>,
+    map: FxHashMap<u16, UnboundedSender<ProxyCommand>>,
     pool: Arc<Mutex<FlatIdPool<u16>>>,
 }
 
@@ -78,7 +76,7 @@ impl IdResource {
 impl Default for ProxyPool {
     fn default() -> Self {
         Self {
-            map: HashMap::new(),
+            map: FxHashMap::default(),
             pool: Arc::new(FlatIdPool::zero_with_capacity(4).into()),
         }
     }
