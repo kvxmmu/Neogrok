@@ -29,7 +29,7 @@ fn main() -> anyhow::Result<()> {
     pretty_env_logger::init_custom_env(ENV_LOGLEVEL);
 
     let mut args = Args::parse();
-    if !args.remote.contains(":") {
+    if !args.remote.contains(':') {
         args.remote.push_str(":6567");
     }
 
