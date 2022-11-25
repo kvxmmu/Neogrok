@@ -47,6 +47,7 @@ where
     pub async fn read_frame(
         &mut self,
         pk: u8,
+        max_forward_size: usize,
     ) -> Result<Frame, ReadError> {
         const fn decode_pkt_type(pkt_type: u8) -> (u8, PacketFlags) {
             let Some(flags) = PacketFlags::from_bits(pkt_type & 0b111) else {
@@ -68,6 +69,14 @@ where
             Frame::FORWARD => {
                 let id = self.read_client_id(flags).await?;
                 let length = self.read_length(flags).await? as usize;
+
+                if length > max_forward_size {
+                    self.skip_read(length).await?;
+                    return Err(ReadError::TooLongBuffer {
+                        expected: max_forward_size,
+                        found: length,
+                    });
+                }
 
                 let mut buffer = Vec::with_capacity(length);
                 let mut rd_buffer =
@@ -140,6 +149,20 @@ where
                 })
             }
         })
+    }
+
+    async fn skip_read(&mut self, n: usize) -> io::Result<()> {
+        let mut skip_buf = [0; 64];
+        let mut skipped = 0;
+        while skipped < n {
+            let chunk_size = (n - skipped).max(skip_buf.len());
+            self.inner
+                .read_exact(&mut skip_buf[..chunk_size])
+                .await?;
+            skipped += chunk_size;
+        }
+
+        Ok(())
     }
 
     async fn read_variadic(

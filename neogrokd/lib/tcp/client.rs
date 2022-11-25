@@ -72,7 +72,7 @@ where
             pkt_type = reader.read_pkt_type() => {
                 let Ok(pkt_type) = pkt_type else { break };
 
-                match reader.read_frame(pkt_type).await {
+                match reader.read_frame(pkt_type, config.server.buffer.per_client << 2).await {
                     Ok(frame) => {
                         let Ok(_) = handle_frame(
                             &mut state,

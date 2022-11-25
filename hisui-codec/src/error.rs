@@ -15,6 +15,8 @@ pub enum ReadError {
     InvalidRightsFlags { flags: u8 },
 
     InvalidString,
+
+    TooLongBuffer { expected: usize, found: usize },
 }
 
 impl std::error::Error for ReadError {}
@@ -26,6 +28,12 @@ impl Display for ReadError {
         }
 
         match self {
+            Self::TooLongBuffer { expected, found } => {
+                f.write_fmt(format_args!(
+                    "The buffer is too long, expected: {expected}, \
+                     actual: {found}"
+                ))
+            }
             Self::UnknownErrorVariant { variant } => f.write_fmt(
                 format_args!("Received unknown error code: 0x{variant:x}"),
             ),

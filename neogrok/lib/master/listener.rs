@@ -57,7 +57,7 @@ pub async fn listen_server(
 
             pkt_type = reader.read_pkt_type() => {
                 let pkt_type = pkt_type?;
-                let frame = reader.read_frame(pkt_type).await?;
+                let frame = reader.read_frame(pkt_type, usize::MAX).await?;
 
                 handle_frame(
                     &args.magic,
