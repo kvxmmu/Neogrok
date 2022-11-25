@@ -19,7 +19,7 @@ pub async fn listen_to(config: Arc<Config>) -> io::Result<()> {
     log::info!("Listening on {}", listener.local_addr()?);
 
     loop {
-        let (stream, address) = listener.accept().await?;
+        let (mut stream, address) = listener.accept().await?;
         if let Err(e) = stream.set_nodelay(true) {
             log::error!(
                 "Failed to set TCP_NODELAY for {address}: {:?} (Closing \
@@ -29,14 +29,16 @@ pub async fn listen_to(config: Arc<Config>) -> io::Result<()> {
             continue;
         }
 
-        let (reader, writer) = stream.into_split();
-        let reader =
-            BufReader::with_capacity(config.server.buffer.read, reader);
         let config = Arc::clone(&config);
 
         tokio::spawn(async move {
             log::info!("{address} Connected to the main server");
 
+            let (reader, writer) = stream.split();
+            let reader = BufReader::with_capacity(
+                config.server.buffer.read,
+                reader,
+            );
             let rights = config.permissions.base.into_rights();
             listen_client(
                 config,
