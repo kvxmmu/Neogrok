@@ -10,10 +10,7 @@ use {
         AsyncReceiver,
         AsyncSender,
     },
-    std::{
-        io,
-        net::SocketAddr,
-    },
+    std::net::SocketAddr,
     tokio::{
         io::{
             AsyncReadExt,
@@ -33,8 +30,9 @@ pub async fn listen_proxy_client(
     self_rx: AsyncReceiver<ProxyCommand>,
 
     buffer_alloc_size: usize,
-) -> io::Result<()> {
+) {
     let mut buffer = vec![0; buffer_alloc_size];
+    let mut gracefully = true;
 
     loop {
         tokio::select! {
@@ -42,7 +40,12 @@ pub async fn listen_proxy_client(
                 let Ok(command) = command else { break };
 
                 match command {
-                    ProxyCommand::ForceDisconnect => break,
+                    ProxyCommand::ForceDisconnect => {
+                        log::info!("{address} Is forcibly disconnected");
+                        gracefully = false;
+                        break;
+                    }
+
                     ProxyCommand::Forward { buffer } => {
                         let Ok(_) = stream.write_all(&buffer).await else { break };
                     }
@@ -50,7 +53,7 @@ pub async fn listen_proxy_client(
             }
 
             read = stream.read(&mut buffer) => {
-                let Ok(read) = read else { break };
+                let Ok(read @ 1..) = read else { break };
                 let Ok(_) = master_tx.send(MasterCommand::Forward {
                     id: res.id(), buffer: Vec::from(&buffer[..read]) }).await else { break };
             }
@@ -58,9 +61,10 @@ pub async fn listen_proxy_client(
     }
 
     res.return_self().await;
-    master_tx
-        .send(MasterCommand::Disconnected { id: res.id() })
-        .await
-        .unwrap_or_default();
-    Ok(())
+    if gracefully {
+        master_tx
+            .send(MasterCommand::Disconnected { id: res.id() })
+            .await
+            .unwrap_or_default();
+    }
 }
