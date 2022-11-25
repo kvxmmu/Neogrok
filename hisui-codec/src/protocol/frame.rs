@@ -16,7 +16,7 @@ pub enum ProtocolError {
     InvalidErrorCode = 1,
 
     ///
-    ServerIsNotStarted = 2,
+    ServerIsNotCreated = 2,
 
     /// Client has no access to perform action
     AccessDenied = 3,
