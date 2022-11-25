@@ -14,7 +14,12 @@ name = "neo"
 path = "src/main.rs"
 
 [dependencies]
+hisui-codec = { path = "../hisui-codec" }
+
 tokio = { workspace = true }
 log = { workspace = true }
+
 pretty_env_logger = "0.4.0"
 clap = { version = "4.0.26", features = ["derive"] }
+num_cpus = "1.14.0"
+anyhow = "1.0.66"

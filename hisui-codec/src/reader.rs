@@ -58,6 +58,13 @@ where
 
         let (pkt_type, flags) = decode_pkt_type(pk);
         Ok(match pkt_type {
+            Frame::CONNECTED => Frame::Connected {
+                id: self.read_client_id(flags).await?,
+            },
+            Frame::DISCONNECTED => Frame::Disconnected {
+                id: self.read_client_id(flags).await?,
+            },
+
             Frame::FORWARD => {
                 let id = self.read_client_id(flags).await?;
                 let length = self.read_length(flags).await? as usize;
@@ -82,16 +89,17 @@ where
                 let flags = self.inner.read_u8().await?;
                 Frame::UpdateRights {
                     rights: Rights::from_bits(flags)
-                        .ok_or(ReadError::InvalidRightsFlags)?,
+                        .ok_or(ReadError::InvalidRightsFlags { flags })?,
                 }
             }
 
             Frame::ERROR => {
                 let error_code = self.inner.read_u8().await?;
-                Frame::Error(
-                    ProtocolError::try_from(error_code)
-                        .map_err(|_| ReadError::UnknownErrorVariant)?,
-                )
+                Frame::Error(ProtocolError::try_from(error_code).map_err(
+                    |_| ReadError::UnknownErrorVariant {
+                        variant: error_code,
+                    },
+                )?)
             }
 
             Frame::PING if self.side == CodecSide::Server => Frame::Ping,
@@ -123,13 +131,6 @@ where
 
             Frame::AUTH_THROUGH_MAGIC => Frame::AuthThroughMagic {
                 magic: self.read_buffer_prefixed().await?,
-            },
-
-            Frame::CONNECTED => Frame::Connected {
-                id: self.read_client_id(flags).await?,
-            },
-            Frame::DISCONNECTED => Frame::Disconnected {
-                id: self.read_client_id(flags).await?,
             },
 
             _ => {

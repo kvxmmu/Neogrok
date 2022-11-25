@@ -3,7 +3,13 @@ use {
         permissions::Rights,
         Protocol,
     },
-    std::mem,
+    std::{
+        fmt::{
+            Debug,
+            Display,
+        },
+        mem,
+    },
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -71,6 +77,13 @@ impl Frame {
     pub const DISCONNECTED: u8       = 6;
     pub const CONNECTED: u8          = 7;
     pub const FORWARD: u8            = 8;
+}
+
+impl std::error::Error for ProtocolError {}
+impl Display for ProtocolError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(&self, f)
+    }
 }
 
 impl TryFrom<u8> for ProtocolError {

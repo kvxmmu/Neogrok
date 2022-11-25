@@ -27,6 +27,11 @@ pub struct Args {
     #[clap(long, short)]
     pub remote: String,
 
+    /// Worker threads (default: number of CPU logical
+    /// cores)
+    #[clap(long, short)]
+    pub workers: Option<usize>,
+
     /// Operation to perform
     #[clap(subcommand)]
     pub subcommand: NSub,

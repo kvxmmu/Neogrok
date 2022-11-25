@@ -29,6 +29,24 @@ impl<Writer> HisuiWriter<Writer>
 where
     Writer: AsyncWriteExt + Unpin,
 {
+    pub async fn authorize_through_magic(
+        &mut self,
+        magic: impl AsRef<str>,
+    ) -> io::Result<()> {
+        let magic = magic.as_ref();
+        self.write_vectored(
+            &[
+                encode_type(
+                    Frame::AUTH_THROUGH_MAGIC,
+                    PacketFlags::empty(),
+                ),
+                magic.len() as _,
+            ],
+            magic.as_bytes(),
+        )
+        .await
+    }
+
     pub async fn write_forward(
         &mut self,
         id: u16,
