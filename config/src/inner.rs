@@ -58,6 +58,7 @@ pub struct CompressionConfig {
 #[derive(Debug, Clone, Deserialize)]
 pub struct TcpBufferCapacity {
     pub read: usize,
+    pub per_client: usize,
 }
 
 #[derive(Debug, Clone, Deserialize)]
