@@ -155,7 +155,7 @@ where
         let mut skip_buf = [0; 64];
         let mut skipped = 0;
         while skipped < n {
-            let chunk_size = (n - skipped).max(skip_buf.len());
+            let chunk_size = (n - skipped).min(skip_buf.len());
             self.inner
                 .read_exact(&mut skip_buf[..chunk_size])
                 .await?;
