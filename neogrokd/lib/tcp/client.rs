@@ -93,10 +93,6 @@ where
     }
 
     log::info!("{} Disconnected from the main server", address);
-    if let Some(state) = state {
-        state.trigger_shutdown();
-        log::debug!("{} Removed initiated proxy server", address);
-    }
 
     Ok(())
 }

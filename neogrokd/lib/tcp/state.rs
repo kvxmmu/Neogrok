@@ -18,7 +18,7 @@ use {
 pub struct State {
     pub pool: ProxyPool,
 
-    trigger: oneshot::Sender<ShutdownToken>,
+    trigger: Option<oneshot::Sender<ShutdownToken>>,
     tx: AsyncSender<MasterCommand>,
     rx: AsyncReceiver<MasterCommand>,
 }
@@ -31,19 +31,13 @@ impl State {
         self.rx.recv()
     }
 
-    pub fn trigger_shutdown(self) {
-        self.trigger
-            .send(ShutdownToken)
-            .unwrap_or_default()
-    }
-
     pub fn new() -> (Self, oneshot::Receiver<ShutdownToken>) {
         let (tx, rx) = unbounded_async();
         let (otx, orx) = oneshot::channel();
 
         (
             Self {
-                trigger: otx,
+                trigger: Some(otx),
 
                 pool: ProxyPool::default(),
                 tx,
@@ -55,5 +49,14 @@ impl State {
 
     pub fn clone_master_tx(&self) -> AsyncSender<MasterCommand> {
         self.tx.clone()
+    }
+}
+
+impl Drop for State {
+    fn drop(&mut self) {
+        std::mem::take(&mut self.trigger)
+            .unwrap()
+            .send(ShutdownToken)
+            .unwrap_or_default();
     }
 }

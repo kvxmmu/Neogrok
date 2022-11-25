@@ -6,15 +6,16 @@ use {
         },
         error::ListenerError,
     },
+    crate::proxy::{
+        client::listen_proxy_client,
+        pool::IdResource,
+    },
     idpool::prelude::FlatIdPool,
     kanal::{
         unbounded_async,
         AsyncSender,
     },
-    std::{
-        io,
-        sync::Arc,
-    },
+    std::sync::Arc,
     tokio::{
         net::TcpListener,
         select,
@@ -31,6 +32,8 @@ pub async fn proxy_listener(
 
     pool: Arc<Mutex<FlatIdPool<u16>>>,
     mut shutdown: Receiver<ShutdownToken>,
+
+    buffer_per_client: usize,
 ) -> Result<(), ListenerError> {
     loop {
         select! {
@@ -46,6 +49,16 @@ pub async fn proxy_listener(
                 let (tx, rx) = unbounded_async();
 
                 master.send(MasterCommand::Connected { tx, id }).await?;
+                tokio::spawn(
+                    listen_proxy_client(
+                        IdResource::new(id, Arc::clone(&pool)),
+                        stream,
+                        address,
+                        master.clone(),
+                        rx,
+                        buffer_per_client
+                    )
+                );
             }
         }
     }

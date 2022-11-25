@@ -1,6 +1,10 @@
 use kanal::AsyncSender;
 
-pub enum ProxyCommand {}
+#[derive(Debug)]
+pub enum ProxyCommand {
+    ForceDisconnect,
+    Forward { buffer: Vec<u8> },
+}
 
 #[derive(Debug)]
 pub enum MasterCommand {

@@ -1,7 +1,10 @@
 use {
     super::state::State,
     crate::{
-        proxy::listener::proxy_listener,
+        proxy::{
+            command::ProxyCommand,
+            listener::proxy_listener,
+        },
         user::User,
     },
     common_codec::{
@@ -27,6 +30,27 @@ use {
     },
 };
 
+macro_rules! send_to_sessioned {
+    ($state:ident: try($id:expr, $message:expr) or write_to $writer:expr) => {
+        match $state {
+            Some(state) => match state.pool.send_to($id, $message).await {
+                Ok(()) => {}
+                Err(_) => {
+                    $writer
+                        .respond_error(ProtocolError::NoSuchClient)
+                        .await?;
+                }
+            },
+
+            _ => {
+                $writer
+                    .respond_error(ProtocolError::ServerIsNotCreated)
+                    .await?;
+            }
+        }
+    };
+}
+
 pub(crate) async fn handle_frame<Writer>(
     state: &mut Option<State>,
 
@@ -42,6 +66,13 @@ where
     Writer: AsyncWriteExt + Unpin,
 {
     match frame {
+        Frame::Forward { id, buffer } => send_to_sessioned!(
+            state: try(id, ProxyCommand::Forward { buffer }) or write_to writer
+        ),
+        Frame::Disconnected { id } => send_to_sessioned!(
+            state: try(id, ProxyCommand::ForceDisconnect) or write_to writer
+        ),
+
         Frame::StartServer { port, protocol } => {
             if state.is_some() {
                 return writer
@@ -79,6 +110,7 @@ where
                         new_state.clone_master_tx(),
                         new_state.pool.clone_id_pool(),
                         shutdown_rx,
+                        config.server.buffer.per_client,
                     ));
 
                     *state = Some(new_state);
