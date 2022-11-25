@@ -218,6 +218,10 @@ where
         let mut buffer_io = IoSlice::new(buffer);
 
         loop {
+            if written == total {
+                break Ok(());
+            }
+
             let amount = self
                 .inner
                 .write_vectored(&[prepend_io, buffer_io])
@@ -225,19 +229,16 @@ where
             written += amount;
 
             match written {
-                _ if written == total => break Ok(()),
-                prep_in_progress if written < prepend.len() => {
+                prep_in_progress if written < prep_len => {
                     prepend_io =
                         IoSlice::new(&prepend[prep_in_progress..]);
                 }
 
-                buffer_in_progress if written >= prepend.len() => {
+                buffer_in_progress => {
                     buffer_io = IoSlice::new(
                         &buffer[buffer_in_progress - prep_len..],
                     );
                 }
-
-                _ => {}
             }
         }
     }
