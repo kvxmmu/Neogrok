@@ -6,33 +6,34 @@ use {
         },
         pool::ProxyPool,
     },
-    kanal::{
-        unbounded_async,
-        AsyncReceiver,
-        AsyncSender,
-    },
     std::future::Future,
-    tokio::sync::oneshot,
+    tokio::sync::{
+        mpsc::{
+            unbounded_channel,
+            UnboundedReceiver,
+            UnboundedSender,
+        },
+        oneshot,
+    },
 };
 
 pub struct State {
     pub pool: ProxyPool,
 
     trigger: Option<oneshot::Sender<ShutdownToken>>,
-    tx: AsyncSender<MasterCommand>,
-    rx: AsyncReceiver<MasterCommand>,
+    tx: UnboundedSender<MasterCommand>,
+    rx: UnboundedReceiver<MasterCommand>,
 }
 
 impl State {
     pub fn recv_command(
-        &self,
-    ) -> impl Future<Output = Result<MasterCommand, kanal::ReceiveError>> + '_
-    {
+        &mut self,
+    ) -> impl Future<Output = Option<MasterCommand>> + '_ {
         self.rx.recv()
     }
 
     pub fn new() -> (Self, oneshot::Receiver<ShutdownToken>) {
-        let (tx, rx) = unbounded_async();
+        let (tx, rx) = unbounded_channel();
         let (otx, orx) = oneshot::channel();
 
         (
@@ -47,7 +48,7 @@ impl State {
         )
     }
 
-    pub fn clone_master_tx(&self) -> AsyncSender<MasterCommand> {
+    pub fn clone_master_tx(&self) -> UnboundedSender<MasterCommand> {
         self.tx.clone()
     }
 }

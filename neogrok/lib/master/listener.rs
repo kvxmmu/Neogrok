@@ -18,8 +18,10 @@ use {
         reader::HisuiReader,
         writer::HisuiWriter,
     },
-    kanal::unbounded_async,
-    tokio::net::TcpStream,
+    tokio::{
+        net::TcpStream,
+        sync::mpsc::unbounded_channel,
+    },
 };
 
 pub async fn listen_server(
@@ -41,7 +43,7 @@ pub async fn listen_server(
     };
 
     let mut pool = ClientsPool::default();
-    let (tx, rx) = unbounded_async::<MasterCommand>();
+    let (tx, mut rx) = unbounded_channel::<MasterCommand>();
 
     loop {
         tokio::select! {

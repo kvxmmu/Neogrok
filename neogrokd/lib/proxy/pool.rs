@@ -7,12 +7,14 @@ use {
         },
     },
     idpool::flat::FlatIdPool,
-    kanal::AsyncSender,
     std::{
         collections::HashMap,
         sync::Arc,
     },
-    tokio::sync::Mutex,
+    tokio::sync::{
+        mpsc::UnboundedSender,
+        Mutex,
+    },
 };
 
 pub struct IdResource {
@@ -21,7 +23,7 @@ pub struct IdResource {
 }
 
 pub struct ProxyPool {
-    map: HashMap<u16, AsyncSender<ProxyCommand>>,
+    map: HashMap<u16, UnboundedSender<ProxyCommand>>,
     pool: Arc<Mutex<FlatIdPool<u16>>>,
 }
 
@@ -41,20 +43,18 @@ impl ProxyPool {
     pub fn create_client(
         &mut self,
         id: u16,
-        tx: AsyncSender<ProxyCommand>,
+        tx: UnboundedSender<ProxyCommand>,
     ) {
         self.map.insert(id, tx);
     }
 
-    pub async fn send_to(
+    pub fn send_to(
         &self,
         id: u16,
         command: ProxyCommand,
     ) -> Result<(), SendError> {
         if let Some(tx) = self.map.get(&id) {
-            tx.send(command)
-                .await
-                .map_err(|_| SendError::Closed)
+            tx.send(command).map_err(|_| SendError::Closed)
         } else {
             Err(SendError::NotFound)
         }

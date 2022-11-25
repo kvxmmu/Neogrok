@@ -33,7 +33,7 @@ use {
 macro_rules! send_to_sessioned {
     ($state:ident: try($id:expr, $message:expr) or write_to $writer:expr) => {
         match $state {
-            Some(state) => match state.pool.send_to($id, $message).await {
+            Some(state) => match state.pool.send_to($id, $message) {
                 Ok(()) => {}
                 Err(_) => {
                     $writer

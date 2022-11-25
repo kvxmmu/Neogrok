@@ -1,23 +1,23 @@
 use {
     super::commands::SlaveCommand,
     crate::master::commands::MasterCommand,
-    kanal::{
-        AsyncReceiver,
-        AsyncSender,
-    },
     tokio::{
         io::{
             AsyncReadExt,
             AsyncWriteExt,
         },
         net::TcpStream,
+        sync::mpsc::{
+            UnboundedReceiver,
+            UnboundedSender,
+        },
     },
 };
 
 pub async fn listen_client(
-    master: AsyncSender<MasterCommand>,
+    master: UnboundedSender<MasterCommand>,
 
-    self_rx: AsyncReceiver<SlaveCommand>,
+    mut self_rx: UnboundedReceiver<SlaveCommand>,
     self_id: u16,
     address: String,
 ) {
@@ -27,7 +27,6 @@ pub async fn listen_client(
             log::error!("Failed to connect to the {}: {}", address, e);
             master
                 .send(MasterCommand::Disconnected { id: self_id })
-                .await
                 .unwrap_or_default();
             return;
         }
@@ -44,13 +43,13 @@ pub async fn listen_client(
                 let Ok(_) = master.send(MasterCommand::Forward {
                     id: self_id,
                     buffer: Vec::from(&buffer[..read])
-                }).await else {
+                }) else {
                     break
                 };
             }
 
             command = self_rx.recv() => {
-                let Ok(command) = command else { break };
+                let Some(command) = command else { break };
 
                 match command {
                     SlaveCommand::Forward { buffer } => {
@@ -70,7 +69,6 @@ pub async fn listen_client(
     if gracefully {
         master
             .send(MasterCommand::Disconnected { id: self_id })
-            .await
             .unwrap_or_default();
     }
 }

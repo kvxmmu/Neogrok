@@ -11,15 +11,15 @@ use {
         pool::IdResource,
     },
     idpool::prelude::FlatIdPool,
-    kanal::{
-        unbounded_async,
-        AsyncSender,
-    },
     std::sync::Arc,
     tokio::{
         net::TcpListener,
         select,
         sync::{
+            mpsc::{
+                unbounded_channel,
+                UnboundedSender,
+            },
             oneshot::Receiver,
             Mutex,
         },
@@ -28,7 +28,7 @@ use {
 
 pub async fn proxy_listener(
     listener: TcpListener,
-    master: AsyncSender<MasterCommand>,
+    master: UnboundedSender<MasterCommand>,
 
     pool: Arc<Mutex<FlatIdPool<u16>>>,
     mut shutdown: Receiver<ShutdownToken>,
@@ -46,9 +46,9 @@ pub async fn proxy_listener(
             pair = listener.accept() => {
                 let (stream, address) = pair?;
                 let id = pool.lock().await.request_id();
-                let (tx, rx) = unbounded_async();
+                let (tx, rx) = unbounded_channel();
 
-                master.send(MasterCommand::Connected { tx, id }).await?;
+                master.send(MasterCommand::Connected { tx, id }).map_err(|_| ListenerError::SendError)?;
                 tokio::spawn(
                     listen_proxy_client(
                         IdResource::new(id, Arc::clone(&pool)),

@@ -17,11 +17,13 @@ use {
         protocol::frame::Frame,
         writer::HisuiWriter,
     },
-    kanal::{
-        unbounded_async,
-        AsyncSender,
+    tokio::{
+        io::AsyncWriteExt,
+        sync::mpsc::{
+            unbounded_channel,
+            UnboundedSender,
+        },
     },
-    tokio::io::AsyncWriteExt,
 };
 
 macro_rules! unexpected_frame {
@@ -40,7 +42,7 @@ pub async fn handle_frame<Writer>(
     magic: &Option<String>,
     remote_port: u16,
     local_address: &str,
-    master_tx: &AsyncSender<MasterCommand>,
+    master_tx: &UnboundedSender<MasterCommand>,
 
     init_state: &mut InitState,
     pool: &mut ClientsPool,
@@ -60,13 +62,12 @@ where
 
             Frame::Forward { id, buffer } => {
                 pool.send_to(id, SlaveCommand::Forward { buffer })
-                    .await
                     .unwrap_or_default();
             }
             Frame::Connected { id } => {
                 log::info!("ID#{id} is connected to the server");
 
-                let (cl_tx, cl_rx) = unbounded_async();
+                let (cl_tx, cl_rx) = unbounded_channel();
 
                 pool.push_client(id, cl_tx);
                 tokio::spawn(listen_client(
@@ -77,7 +78,7 @@ where
                 ));
             }
             Frame::Disconnected { id } => {
-                match pool.send_to(id, SlaveCommand::Disconnect).await {
+                match pool.send_to(id, SlaveCommand::Disconnect) {
                     Ok(()) => {}
                     Err(error) => {
                         log::error!(

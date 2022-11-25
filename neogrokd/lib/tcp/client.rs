@@ -42,8 +42,8 @@ where
     Writer: AsyncWriteExt + Unpin,
 {
     async fn recv_command_or_wait(
-        state: &Option<State>,
-    ) -> Result<MasterCommand, kanal::ReceiveError> {
+        state: &mut Option<State>,
+    ) -> Option<MasterCommand> {
         if let Some(state) = state {
             state.recv_command().await
         } else {
@@ -59,8 +59,8 @@ where
 
     loop {
         select! {
-            command = recv_command_or_wait(&state) => {
-                let Ok(command) = command else { break };
+            command = recv_command_or_wait(&mut state) => {
+                let Some(command) = command else { break };
                 let Ok(_) = handle_command(
                     &address,
                     state.as_mut().unwrap(),

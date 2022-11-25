@@ -22,9 +22,3 @@ impl From<io::Error> for ListenerError {
         ListenerError::Io(value)
     }
 }
-
-impl From<kanal::SendError> for ListenerError {
-    fn from(_: kanal::SendError) -> Self {
-        ListenerError::SendError
-    }
-}

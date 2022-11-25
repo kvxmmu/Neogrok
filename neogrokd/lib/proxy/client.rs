@@ -6,10 +6,6 @@ use {
         },
         pool::IdResource,
     },
-    kanal::{
-        AsyncReceiver,
-        AsyncSender,
-    },
     std::net::SocketAddr,
     tokio::{
         io::{
@@ -17,6 +13,10 @@ use {
             AsyncWriteExt,
         },
         net::TcpStream,
+        sync::mpsc::{
+            UnboundedReceiver,
+            UnboundedSender,
+        },
     },
 };
 
@@ -26,8 +26,8 @@ pub async fn listen_proxy_client(
     mut stream: TcpStream,
     address: SocketAddr,
 
-    master_tx: AsyncSender<MasterCommand>,
-    self_rx: AsyncReceiver<ProxyCommand>,
+    master_tx: UnboundedSender<MasterCommand>,
+    mut self_rx: UnboundedReceiver<ProxyCommand>,
 
     buffer_alloc_size: usize,
 ) {
@@ -37,7 +37,7 @@ pub async fn listen_proxy_client(
     loop {
         tokio::select! {
             command = self_rx.recv() => {
-                let Ok(command) = command else { break };
+                let Some(command) = command else { break };
 
                 match command {
                     ProxyCommand::ForceDisconnect => {
@@ -55,7 +55,7 @@ pub async fn listen_proxy_client(
             read = stream.read(&mut buffer) => {
                 let Ok(read @ 1..) = read else { break };
                 let Ok(_) = master_tx.send(MasterCommand::Forward {
-                    id: res.id(), buffer: Vec::from(&buffer[..read]) }).await else { break };
+                    id: res.id(), buffer: Vec::from(&buffer[..read]) }) else { break };
             }
         }
     }
@@ -64,7 +64,6 @@ pub async fn listen_proxy_client(
     if gracefully {
         master_tx
             .send(MasterCommand::Disconnected { id: res.id() })
-            .await
             .unwrap_or_default();
     }
 }

@@ -1,4 +1,4 @@
-use kanal::AsyncSender;
+use tokio::sync::mpsc::UnboundedSender;
 
 #[derive(Debug)]
 pub enum ProxyCommand {
@@ -9,7 +9,7 @@ pub enum ProxyCommand {
 #[derive(Debug)]
 pub enum MasterCommand {
     Connected {
-        tx: AsyncSender<ProxyCommand>,
+        tx: UnboundedSender<ProxyCommand>,
         id: u16,
     },
 
