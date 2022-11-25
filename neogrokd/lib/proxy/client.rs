@@ -58,5 +58,9 @@ pub async fn listen_proxy_client(
     }
 
     res.return_self().await;
+    master_tx
+        .send(MasterCommand::Disconnected { id: res.id() })
+        .await
+        .unwrap_or_default();
     Ok(())
 }

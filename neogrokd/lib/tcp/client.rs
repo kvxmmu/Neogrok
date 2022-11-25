@@ -62,6 +62,7 @@ where
             command = recv_command_or_wait(&state) => {
                 let Ok(command) = command else { break };
                 let Ok(_) = handle_command(
+                    &address,
                     state.as_mut().unwrap(),
                     &mut writer,
                     command
