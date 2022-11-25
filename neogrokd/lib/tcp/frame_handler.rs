@@ -7,12 +7,12 @@ use {
         },
         user::User,
     },
-    common_codec::{
-        permissions::Rights,
-        Protocol,
-    },
     config::Config,
     hisui_codec::{
+        common::{
+            permissions::Rights,
+            Protocol,
+        },
         protocol::frame::{
             Frame,
             ProtocolError,

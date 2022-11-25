@@ -1,5 +1,5 @@
 use {
-    common_codec::permissions::Rights,
+    hisui_codec::common::permissions::Rights,
     std::net::SocketAddr,
 };
 
