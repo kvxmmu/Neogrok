@@ -13,6 +13,7 @@ use {
         compression::PayloadDecompressor,
         permissions::Rights,
         CodecSide,
+        Compression,
         Protocol,
     },
     std::{
@@ -127,8 +128,17 @@ where
 
             Frame::PING if self.side == CodecSide::Server => Frame::Ping,
             Frame::PING if self.side == CodecSide::Client => {
+                let name = self.read_string().await?;
+                let algorithm = self.inner.read_u8().await?;
+                let level = self.inner.read_u8().await?; // TODO: add level validation
+
                 Frame::PingResponse {
-                    name: self.read_string().await?,
+                    name,
+                    compression_algorithm: Compression::try_from(
+                        algorithm,
+                    )
+                    .map_err(|_| ReadError::InvalidCompressionAlgorithm)?,
+                    level,
                 }
             }
 
@@ -243,5 +253,9 @@ where
             side,
             decompressor,
         }
+    }
+
+    pub fn replace_decompressor(&mut self, new: PayloadDecompressor) {
+        self.decompressor = new;
     }
 }

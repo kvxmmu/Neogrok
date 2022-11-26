@@ -9,6 +9,12 @@ use {
     },
 };
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CompressionStatus {
+    pub before: u16,
+    pub after: u16,
+}
+
 pub enum PayloadCompressor {
     Deflate(DeflateCompressor),
     ZStd(ZStdCctx),
@@ -17,6 +23,12 @@ pub enum PayloadCompressor {
 pub enum PayloadDecompressor {
     Deflate(DeflateDecompressor),
     ZStd(ZStdDctx),
+}
+
+impl CompressionStatus {
+    pub fn ratio(&self) -> f64 {
+        (self.before as f64) / (self.after as f64)
+    }
 }
 
 impl PayloadDecompressor {

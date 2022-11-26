@@ -8,8 +8,12 @@ use {
         },
     },
     common_codec::{
-        compression::PayloadCompressor,
+        compression::{
+            CompressionStatus,
+            PayloadCompressor,
+        },
         permissions::Rights,
+        Compression,
         Protocol,
     },
     std::{
@@ -54,8 +58,9 @@ where
         id: u16,
         mut buffer: &[u8],
         compress_threshold: usize,
-    ) -> io::Result<bool> {
+    ) -> io::Result<Option<CompressionStatus>> {
         let mut compressed = Vec::<u8>::new();
+        let before = buffer.len();
         let mut flags = PacketFlags::empty();
 
         if buffer.len() >= compress_threshold {
@@ -99,8 +104,17 @@ where
         hdr[0] = encode_type(Frame::FORWARD, flags);
 
         self.write_vectored(&hdr[..offset], buffer)
-            .await?;
-        Ok(compressed.capacity() != 0)
+            .await
+            .map(move |_| {
+                if compressed.capacity() != 0 {
+                    Some(CompressionStatus {
+                        before: before as _,
+                        after: compressed.len() as _,
+                    })
+                } else {
+                    None
+                }
+            })
     }
 
     pub fn write_connected(
@@ -208,11 +222,18 @@ where
             .await
     }
 
-    pub async fn respond_ping(&mut self, data: &[u8]) -> io::Result<()> {
+    pub async fn respond_ping(
+        &mut self,
+        data: &[u8],
+        compression: Compression,
+        level: u8,
+    ) -> io::Result<()> {
         self.write_vectored(
             &[
                 encode_type(Frame::PING, PacketFlags::empty()),
                 data.len() as u8,
+                compression as u8,
+                level,
             ],
             data,
         )
@@ -268,5 +289,9 @@ where
 
     pub fn new(inner: Writer, compressor: PayloadCompressor) -> Self {
         Self { inner, compressor }
+    }
+
+    pub fn replace_compressor(&mut self, compressor: PayloadCompressor) {
+        self.compressor = compressor;
     }
 }

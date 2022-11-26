@@ -10,15 +10,24 @@ use {
     },
     hisui_codec::{
         common::{
+            compression::{
+                PayloadCompressor,
+                PayloadDecompressor,
+            },
             permissions::Rights,
+            Compression,
             Protocol,
         },
         error::ReadError,
         protocol::frame::Frame,
+        reader::HisuiReader,
         writer::HisuiWriter,
     },
     tokio::{
-        io::AsyncWriteExt,
+        io::{
+            AsyncReadExt,
+            AsyncWriteExt,
+        },
         sync::mpsc::{
             unbounded_channel,
             UnboundedSender,
@@ -38,7 +47,7 @@ macro_rules! unexpected_frame {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub async fn handle_frame<Writer>(
+pub async fn handle_frame<Reader, Writer>(
     magic: &Option<String>,
     remote_port: u16,
     local_address: &str,
@@ -47,12 +56,14 @@ pub async fn handle_frame<Writer>(
     init_state: &mut InitState,
     pool: &mut ClientsPool,
 
+    reader: &mut HisuiReader<Reader>,
     writer: &mut HisuiWriter<Writer>,
 
     frame: Frame,
 ) -> Result<(), ReadError>
 where
     Writer: AsyncWriteExt + Unpin,
+    Reader: AsyncReadExt + Unpin,
 {
     match *init_state {
         InitState::Polling => match frame {
@@ -114,8 +125,32 @@ where
         },
 
         InitState::WaitingForPing => match frame {
-            Frame::PingResponse { name } => {
-                log::info!("Connected to the {}!", name);
+            Frame::PingResponse {
+                name,
+                compression_algorithm,
+                level,
+            } => {
+                log::info!(
+                    "Connected to the {}! (Compression algorithm {:?} \
+                     with level {})",
+                    name,
+                    compression_algorithm,
+                    level
+                );
+                writer.replace_compressor(match compression_algorithm {
+                    Compression::Deflate => {
+                        PayloadCompressor::deflate(level as _)
+                    }
+                    Compression::Zstd => {
+                        PayloadCompressor::zstd(level as _)
+                    }
+                    Compression::Last => unreachable!(),
+                });
+                reader.replace_decompressor(match compression_algorithm {
+                    Compression::Deflate => PayloadDecompressor::deflate(),
+                    Compression::Zstd => PayloadDecompressor::zstd(),
+                    Compression::Last => unreachable!(),
+                });
 
                 if let Some(magic) = magic {
                     log::info!("Authorizing through magic...");

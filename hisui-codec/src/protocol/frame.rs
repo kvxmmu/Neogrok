@@ -1,6 +1,7 @@
 use {
     common_codec::{
         permissions::Rights,
+        Compression,
         Protocol,
     },
     std::{
@@ -46,20 +47,40 @@ pub enum ProtocolError {
 #[derive(Debug, Clone)]
 pub enum Frame {
     Ping,
-    PingResponse { name: String },
+    PingResponse {
+        name: String,
+        compression_algorithm: Compression,
+        level: u8,
+    },
 
-    StartServer { port: u16, protocol: Protocol },
+    StartServer {
+        port: u16,
+        protocol: Protocol,
+    },
     StartHttpServer,
 
-    StartServerResponse { port: u16 },
+    StartServerResponse {
+        port: u16,
+    },
 
-    AuthThroughMagic { magic: Vec<u8> },
-    UpdateRights { rights: Rights },
+    AuthThroughMagic {
+        magic: Vec<u8>,
+    },
+    UpdateRights {
+        rights: Rights,
+    },
 
     // Tcp
-    Connected { id: u16 },
-    Forward { id: u16, buffer: Vec<u8> },
-    Disconnected { id: u16 },
+    Connected {
+        id: u16,
+    },
+    Forward {
+        id: u16,
+        buffer: Vec<u8>,
+    },
+    Disconnected {
+        id: u16,
+    },
     //
     Error(ProtocolError),
 }

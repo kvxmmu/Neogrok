@@ -18,6 +18,8 @@ pub enum ReadError {
 
     TooLongBuffer { expected: usize, found: usize },
     FailedToDecompress,
+
+    InvalidCompressionAlgorithm,
 }
 
 impl std::error::Error for ReadError {}

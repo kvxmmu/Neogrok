@@ -9,7 +9,10 @@ use {
         },
         user::User,
     },
-    config::Config,
+    config::{
+        CompressionAlgorithm,
+        Config,
+    },
     hisui_codec::{
         self,
         common::compression::{
@@ -56,12 +59,20 @@ where
         }
     }
 
-    let (mut reader, mut writer) = (
-        HisuiReader::server(reader, PayloadDecompressor::deflate()),
-        HisuiWriter::new(
-            writer,
+    let (comp, decomp) = match config.compression.algorithm {
+        CompressionAlgorithm::Deflate => (
             PayloadCompressor::deflate(config.compression.level as _),
+            PayloadDecompressor::deflate(),
         ),
+        CompressionAlgorithm::ZStandard => (
+            PayloadCompressor::zstd(config.compression.level as _),
+            PayloadDecompressor::zstd(),
+        ),
+    };
+
+    let (mut reader, mut writer) = (
+        HisuiReader::server(reader, decomp),
+        HisuiWriter::new(writer, comp),
     );
 
     let mut state: Option<State> = None;

@@ -11,6 +11,7 @@ use {
     hisui_codec::{
         common::{
             permissions::Rights,
+            Compression,
             Protocol,
         },
         protocol::frame::{
@@ -189,7 +190,14 @@ where
         Frame::Ping => {
             log::info!("{} Ping request", address);
             writer
-                .respond_ping(config.server.name.as_bytes())
+                .respond_ping(
+                    config.server.name.as_bytes(),
+                    Compression::try_from(
+                        config.compression.algorithm as u8,
+                    )
+                    .unwrap(),
+                    config.compression.level,
+                )
                 .await?;
         }
 
