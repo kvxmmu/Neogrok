@@ -24,13 +24,13 @@ impl DeflateDecompressor {
     ) -> Option<Vec<u8>> {
         unsafe {
             let ptr = buffer.as_ptr();
-            let mut buffer: Vec<u8> =
+            let mut out_buffer: Vec<u8> =
                 Vec::with_capacity(max_decompressed_size);
             let mut actual_nbytes_ret = usize::MAX;
 
             let result;
             {
-                let spare = buffer.spare_capacity_mut();
+                let spare = out_buffer.spare_capacity_mut();
                 let buf_ptr = spare.as_mut_ptr() as *mut ffi::c_void;
 
                 result = libdeflate_deflate_decompress(
@@ -38,7 +38,7 @@ impl DeflateDecompressor {
                     ptr as *const ffi::c_void,
                     buffer.len(),
                     buf_ptr,
-                    buffer.capacity(),
+                    out_buffer.capacity(),
                     &mut actual_nbytes_ret as *mut _,
                 );
             }
@@ -48,8 +48,8 @@ impl DeflateDecompressor {
                     unreachable!();
                 }
 
-                buffer.set_len(actual_nbytes_ret);
-                Some(buffer)
+                out_buffer.set_len(actual_nbytes_ret);
+                Some(out_buffer)
             } else {
                 log::debug!("Failed to decompress: {}", result);
                 None

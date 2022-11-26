@@ -44,15 +44,6 @@ impl DeflateCompressor {
             }
 
             if compressed_size != 0 {
-                #[cfg(debug_assertions)]
-                {
-                    log::debug!(
-                        "Compressed size = {}, capacity = {}",
-                        compressed_size,
-                        out.capacity()
-                    );
-                }
-
                 out.set_len(compressed_size);
                 Some(out)
             } else {
