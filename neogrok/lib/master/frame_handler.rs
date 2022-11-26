@@ -79,7 +79,9 @@ where
             }
             Frame::Disconnected { id } => {
                 match pool.send_to(id, SlaveCommand::Disconnect) {
-                    Ok(()) => {}
+                    Ok(()) => {
+                        log::info!("ID#{id} is disconnected");
+                    }
                     Err(error) => {
                         log::error!(
                             "Failed to disconnect ID#{id} ({error}), \
