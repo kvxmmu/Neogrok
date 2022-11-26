@@ -13,6 +13,7 @@ members = [
     "medusa-codec",
     "hisui-codec",
     "common-codec",
+    "utils",
 ]
 
 [workspace.dependencies]

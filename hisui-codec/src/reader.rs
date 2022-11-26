@@ -74,7 +74,7 @@ where
                 let id = self.read_client_id(flags).await?;
                 let length = self.read_length(flags).await? as usize;
 
-                if length > max_forward_size {
+                if utils::unlikely(length > max_forward_size) {
                     self.skip_read(length).await?;
                     return Err(ReadError::TooLongBuffer {
                         expected: max_forward_size,

@@ -43,7 +43,7 @@ impl DeflateCompressor {
                 );
             }
 
-            if compressed_size != 0 {
+            if utils::likely(compressed_size != 0) {
                 out.set_len(compressed_size);
                 Some(out)
             } else {
@@ -53,7 +53,7 @@ impl DeflateCompressor {
     }
 
     pub fn try_new(level: i32) -> Option<Self> {
-        assert!(level > 0 && level <= 12);
+        assert!(utils::likely(level > 0 && level <= 12));
         let compressor = unsafe { libdeflate_alloc_compressor(level) };
 
         NonNull::new(compressor).map(|ptr| Self { ptr })

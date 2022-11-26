@@ -43,8 +43,11 @@ impl DeflateDecompressor {
                 );
             }
 
-            if result == libdeflate_result_LIBDEFLATE_SUCCESS {
+            if utils::likely(
+                result == libdeflate_result_LIBDEFLATE_SUCCESS,
+            ) {
                 if actual_nbytes_ret == usize::MAX {
+                    // Automatically cold path
                     unreachable!();
                 }
 

@@ -12,5 +12,6 @@ bitflags = { workspace = true }
 smol_str = { workspace = true }
 
 common-codec = { path = "../common-codec" }
+utils = { path = "../utils" }
 
 log = { workspace = true }
