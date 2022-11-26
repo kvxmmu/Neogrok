@@ -51,6 +51,7 @@ impl DeflateDecompressor {
                 buffer.set_len(actual_nbytes_ret);
                 Some(buffer)
             } else {
+                log::debug!("Failed to decompress: {}", result);
                 None
             }
         }
