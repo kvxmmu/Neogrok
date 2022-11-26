@@ -56,15 +56,18 @@ where
         compress_threshold: usize,
     ) -> io::Result<bool> {
         let mut compressed = Vec::<u8>::new();
+        let mut flags = PacketFlags::empty();
+
         if buffer.len() >= compress_threshold {
             let comp_buf = self.compressor.compress(buffer, buffer.len());
             if let Some(buf) = comp_buf {
                 compressed = buf;
                 buffer = &compressed;
+
+                flags |= PacketFlags::COMPRESSED;
             }
         }
 
-        let mut flags = PacketFlags::empty();
         let mut hdr = [0u8; 5];
         let mut offset = 1;
         let buf_len = buffer.len();
