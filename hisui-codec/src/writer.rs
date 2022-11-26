@@ -61,11 +61,24 @@ where
         if buffer.len() >= compress_threshold {
             let comp_buf = self.compressor.compress(buffer, buffer.len());
             if let Some(buf) = comp_buf {
+                #[cfg(debug_assertions)]
+                {
+                    log::debug!(
+                        "compressed {} to {}",
+                        buffer.len(),
+                        buf.len()
+                    );
+                }
                 compressed = buf;
                 buffer = &compressed;
 
                 flags |= PacketFlags::COMPRESSED;
             }
+        }
+
+        #[cfg(debug_assertions)]
+        {
+            log::debug!("Buffer length is {} ({:?})", buffer.len(), flags);
         }
 
         let mut hdr = [0u8; 5];
