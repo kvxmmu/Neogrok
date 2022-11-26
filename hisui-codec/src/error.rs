@@ -19,7 +19,7 @@ pub enum ReadError {
     TooLongBuffer { expected: usize, found: usize },
     FailedToDecompress,
 
-    InvalidCompressionAlgorithm,
+    InvalidCompressionAlgorithm { code: u8 },
 }
 
 impl std::error::Error for ReadError {}
@@ -31,6 +31,16 @@ impl Display for ReadError {
         }
 
         match self {
+            Self::InvalidCompressionAlgorithm { code } => {
+                f.write_fmt(format_args!(
+                    "Invalid compression algorithm: 0x{:x}",
+                    code
+                ))
+            }
+
+            Self::FailedToDecompress => {
+                f.write_str("Failed to decompress buffer")
+            }
             Self::TooLongBuffer { expected, found } => {
                 f.write_fmt(format_args!(
                     "The buffer is too long, expected: {expected}, \
@@ -56,7 +66,7 @@ impl Display for ReadError {
                 ))
             }
 
-            _ => f.write_fmt(format_args!("")),
+            Self::Io(_) => unreachable!(),
         }
     }
 }

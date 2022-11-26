@@ -137,7 +137,11 @@ where
                     compression_algorithm: Compression::try_from(
                         algorithm,
                     )
-                    .map_err(|_| ReadError::InvalidCompressionAlgorithm)?,
+                    .map_err(|_| {
+                        ReadError::InvalidCompressionAlgorithm {
+                            code: algorithm,
+                        }
+                    })?,
                     level,
                 }
             }
