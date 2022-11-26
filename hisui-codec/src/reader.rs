@@ -128,9 +128,9 @@ where
 
             Frame::PING if self.side == CodecSide::Server => Frame::Ping,
             Frame::PING if self.side == CodecSide::Client => {
-                let name = self.read_string().await?;
                 let algorithm = self.inner.read_u8().await?;
                 let level = self.inner.read_u8().await?; // TODO: add level validation
+                let name = self.read_string().await?;
 
                 Frame::PingResponse {
                     name,

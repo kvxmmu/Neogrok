@@ -231,9 +231,9 @@ where
         self.write_vectored(
             &[
                 encode_type(Frame::PING, PacketFlags::empty()),
-                data.len() as u8,
                 compression as u8,
                 level,
+                data.len() as u8,
             ],
             data,
         )
