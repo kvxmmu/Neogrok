@@ -5,6 +5,7 @@ files = []
 [compression]
 algorithm = "deflate"
 level = 10
+threshold = 64
 
 [database]
 url = "sqlite:///db.sqlite"

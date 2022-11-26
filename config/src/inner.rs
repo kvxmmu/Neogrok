@@ -53,6 +53,7 @@ pub struct DatabaseConfig {
 pub struct CompressionConfig {
     pub algorithm: CompressionAlgorithm,
     pub level: u8,
+    pub threshold: usize,
 }
 
 #[derive(Debug, Clone, Deserialize)]
