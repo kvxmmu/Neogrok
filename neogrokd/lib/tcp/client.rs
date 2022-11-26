@@ -12,6 +12,10 @@ use {
     config::Config,
     hisui_codec::{
         self,
+        common::compression::{
+            PayloadCompressor,
+            PayloadDecompressor,
+        },
         error::ReadError,
         reader::HisuiReader,
         writer::HisuiWriter,
@@ -52,8 +56,13 @@ where
         }
     }
 
-    let (mut reader, mut writer) =
-        (HisuiReader::server(reader), HisuiWriter::new(writer));
+    let (mut reader, mut writer) = (
+        HisuiReader::server(reader, PayloadDecompressor::deflate()),
+        HisuiWriter::new(
+            writer,
+            PayloadCompressor::deflate(config.compression.level as _),
+        ),
+    );
 
     let mut state: Option<State> = None;
 
@@ -65,14 +74,16 @@ where
                     &address,
                     state.as_mut().unwrap(),
                     &mut writer,
-                    command
+                    command,
+                    config.compression.threshold,
                 ).await else { break };
             },
 
             pkt_type = reader.read_pkt_type() => {
                 let Ok(pkt_type) = pkt_type else { break };
 
-                match reader.read_frame(pkt_type, config.server.buffer.per_client << 2).await {
+                let per_client = config.server.buffer.per_client;
+                match reader.read_frame(pkt_type, per_client << 1, per_client << 2).await {
                     Ok(frame) => {
                         let Ok(_) = handle_frame(
                             &mut state,

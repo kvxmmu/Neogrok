@@ -18,13 +18,16 @@ pub(crate) async fn handle_command<Writer>(
     writer: &mut HisuiWriter<Writer>,
 
     command: MasterCommand,
+    threshold: usize,
 ) -> io::Result<()>
 where
     Writer: AsyncWriteExt + Unpin,
 {
     match command {
         MasterCommand::Forward { id, buffer } => {
-            writer.write_forward(id, &buffer).await?;
+            writer
+                .write_forward(id, &buffer, threshold)
+                .await?;
         }
 
         MasterCommand::Connected { tx, id } => {

@@ -12,13 +12,17 @@ pub async fn handle_command<Writer>(
     writer: &mut HisuiWriter<Writer>,
     command: MasterCommand,
     pool: &mut ClientsPool,
+
+    compress_threshold: usize,
 ) -> io::Result<()>
 where
     Writer: AsyncWriteExt + Unpin,
 {
     match command {
         MasterCommand::Forward { id, buffer } => {
-            writer.write_forward(id, &buffer).await?
+            writer
+                .write_forward(id, &buffer, compress_threshold)
+                .await?;
         }
         MasterCommand::Disconnected { id } => {
             writer
