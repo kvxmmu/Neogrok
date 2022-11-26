@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 bitflags = { workspace = true }
+
+deflate = { path = "../deflate" }
+zstd = { path = "../zstd" }
