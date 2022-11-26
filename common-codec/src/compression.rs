@@ -64,3 +64,9 @@ impl PayloadCompressor {
         Self::Deflate(DeflateCompressor::new(level))
     }
 }
+
+// SAFETY: This is safe because corresponding function
+// taking mutable reference so they can not be used across
+// threads simulatenously
+unsafe impl Send for PayloadCompressor {}
+unsafe impl Send for PayloadDecompressor {}
