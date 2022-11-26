@@ -13,7 +13,7 @@ url = "sqlite:///db.sqlite"
 listen = "0.0.0.0:6567"
 name = "NeoGrok 1.0-release"
 
-buffer = { read = 1024, per_client = 512 }
+buffer = { read = 1024, per_client = 1024 }
 
 workers = 10
 magic = "simple-magic"
