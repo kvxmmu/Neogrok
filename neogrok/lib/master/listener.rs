@@ -76,6 +76,7 @@ pub async fn listen_server(
                     &tx,
                     &mut init_state,
                     &mut pool,
+                    &mut reader,
                     &mut writer,
                     frame
                 ).await?;
