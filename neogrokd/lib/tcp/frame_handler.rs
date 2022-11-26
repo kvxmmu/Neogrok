@@ -7,7 +7,10 @@ use {
         },
         user::User,
     },
-    config::Config,
+    config::{
+        CompressionAlgorithm,
+        Config,
+    },
     hisui_codec::{
         common::{
             permissions::Rights,
@@ -192,10 +195,14 @@ where
             writer
                 .respond_ping(
                     config.server.name.as_bytes(),
-                    Compression::try_from(
-                        config.compression.algorithm as u8,
-                    )
-                    .unwrap(),
+                    match config.compression.algorithm {
+                        CompressionAlgorithm::Deflate => {
+                            Compression::Deflate
+                        }
+                        CompressionAlgorithm::ZStandard => {
+                            Compression::Zstd
+                        }
+                    },
                     config.compression.level,
                 )
                 .await?;
