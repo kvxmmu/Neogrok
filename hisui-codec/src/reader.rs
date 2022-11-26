@@ -10,6 +10,7 @@ use {
         },
     },
     common_codec::{
+        compression::PayloadDecompressor,
         permissions::Rights,
         CodecSide,
         Protocol,
@@ -31,6 +32,7 @@ use {
 
 pub struct HisuiReader<Reader> {
     inner: Reader,
+    decompressor: PayloadDecompressor,
     side: CodecSide,
 }
 
@@ -48,6 +50,7 @@ where
         &mut self,
         pk: u8,
         max_forward_size: usize,
+        max_decompressed_size: usize,
     ) -> Result<Frame, ReadError> {
         const fn decode_pkt_type(pkt_type: u8) -> (u8, PacketFlags) {
             let Some(flags) = PacketFlags::from_bits(pkt_type & 0b111) else {
@@ -91,6 +94,17 @@ where
                 }
 
                 unsafe { buffer.set_len(length) };
+                if flags.intersects(PacketFlags::COMPRESSED) {
+                    let decompressed = self
+                        .decompressor
+                        .decompress(&buffer, max_decompressed_size);
+
+                    if let Some(buf) = decompressed {
+                        buffer = buf;
+                    } else {
+                        return Err(ReadError::FailedToDecompress);
+                    }
+                }
 
                 Frame::Forward { id, buffer }
             }
@@ -205,15 +219,29 @@ where
             .map(move |_| buffer)
     }
 
-    pub const fn client(inner: Reader) -> Self {
-        Self::new(inner, CodecSide::Client)
+    pub const fn client(
+        inner: Reader,
+        decompressor: PayloadDecompressor,
+    ) -> Self {
+        Self::new(inner, CodecSide::Client, decompressor)
     }
 
-    pub const fn server(inner: Reader) -> Self {
-        Self::new(inner, CodecSide::Server)
+    pub const fn server(
+        inner: Reader,
+        decompressor: PayloadDecompressor,
+    ) -> Self {
+        Self::new(inner, CodecSide::Server, decompressor)
     }
 
-    pub const fn new(inner: Reader, side: CodecSide) -> Self {
-        Self { inner, side }
+    pub const fn new(
+        inner: Reader,
+        side: CodecSide,
+        decompressor: PayloadDecompressor,
+    ) -> Self {
+        Self {
+            inner,
+            side,
+            decompressor,
+        }
     }
 }

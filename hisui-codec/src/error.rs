@@ -17,6 +17,7 @@ pub enum ReadError {
     InvalidString,
 
     TooLongBuffer { expected: usize, found: usize },
+    FailedToDecompress,
 }
 
 impl std::error::Error for ReadError {}

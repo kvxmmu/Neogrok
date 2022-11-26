@@ -8,6 +8,7 @@ use {
         },
     },
     common_codec::{
+        compression::PayloadCompressor,
         permissions::Rights,
         Protocol,
     },
@@ -23,6 +24,7 @@ use {
 
 pub struct HisuiWriter<Writer> {
     inner: Writer,
+    compressor: PayloadCompressor,
 }
 
 impl<Writer> HisuiWriter<Writer>
@@ -50,10 +52,20 @@ where
     pub async fn write_forward(
         &mut self,
         id: u16,
-        buffer: &[u8],
-    ) -> io::Result<()> {
+        mut buffer: &[u8],
+        compress_threshold: usize,
+    ) -> io::Result<bool> {
+        let mut compressed = Vec::<u8>::new();
+        if buffer.len() >= compress_threshold {
+            let comp_buf = self.compressor.compress(buffer, buffer.len());
+            if let Some(buf) = comp_buf {
+                compressed = buf;
+                buffer = &compressed;
+            }
+        }
+
         let mut flags = PacketFlags::empty();
-        let mut hdr = [0u8; 4];
+        let mut hdr = [0u8; 5];
         let mut offset = 1;
         let buf_len = buffer.len();
 
@@ -83,8 +95,9 @@ where
 
         hdr[0] = encode_type(Frame::FORWARD, flags);
 
-        // TODO: implement compression
-        self.write_vectored(&hdr[..offset], buffer).await
+        self.write_vectored(&hdr[..offset], buffer)
+            .await?;
+        Ok(compressed.capacity() != 0)
     }
 
     pub fn write_connected(
@@ -250,7 +263,7 @@ where
             .write_u8(encode_type(Frame::PING, PacketFlags::empty()))
     }
 
-    pub fn new(inner: Writer) -> Self {
-        Self { inner }
+    pub fn new(inner: Writer, compressor: PayloadCompressor) -> Self {
+        Self { inner, compressor }
     }
 }
