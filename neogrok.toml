@@ -1,0 +1,40 @@
+[logging]
+level = "info"
+files = []
+
+[compression]
+algorithm = "deflate"
+level = 10
+threshold = 64
+
+[database]
+url = "sqlite:///db.sqlite"
+
+[server]
+listen = "0.0.0.0:6567"
+name = "NeoGrok 1.0-release"
+
+buffer = { read = 1024, per_client = 1024 }
+
+workers = 10
+magic = "simple-magic"
+
+bind_host = "0.0.0.0"
+
+[permissions.base]
+can_create_tcp = false
+can_create_udp = false
+can_create_http = false
+
+can_select_tcp = false
+can_select_udp = false
+can_select_http = false
+
+[permissions.magic_authorized]
+can_create_tcp = true
+can_create_udp = true
+can_create_http = true
+
+can_select_tcp = true
+can_select_udp = true
+can_select_http = true

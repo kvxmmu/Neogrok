@@ -1,0 +1,15 @@
+[package]
+name = "config"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+url = { workspace = true }
+log = { workspace = true }
+
+common-codec = { path = "../common-codec" }
+
+serde = { version = "1.0.147", features = ["derive"] }
+toml = "0.5.9"
