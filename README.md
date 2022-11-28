@@ -1,5 +1,8 @@
 # NeoGrok
 
+Before reading the code or README please take a look at 
+[retirement.md](retirement.md) statement.
+
 Free and open source self-hosted ngrok.io alternative.
 
 # Navigation
