@@ -1,36 +1,28 @@
-[profile.release]
-lto = true
-opt-level = 3
-
 [workspace]
 members = [
+    "common",
+    "neogrok-compression",
+    "neogrok-protocol",
     "idpool",
-    "neogrokd",
-    "config",
-    "deflate",
-    "zstd",
-    "neogrok",
-    "medusa-codec",
-    "hisui-codec",
-    "common-codec",
-    "utils",
+    "server",
+    "client",
 ]
 
 [workspace.dependencies]
-num = "0.4.0"
-url = { version = "2.3.1", features = ["serde"] }
-
-smol_str = "0.1.23"
-log = "0.4.17"
-byteorder = "1.4.3"
-bitflags = "1.3.2"
-
+tracing = "0.1.37"
+tracing-subscriber = "0.3.16"
+flume = { version = "0.10.14", default-features = false, features = [
+    "async",
+    "eventual-fairness",
+] }
 rustc-hash = "1.1.0"
+
 tokio = { version = "1.22.0", default-features = false, features = [
     "net",
+    "sync",
     "rt",
     "rt-multi-thread",
-    "macros",
     "io-util",
-    "sync",
+    "macros",
 ] }
+thiserror = "1.0.37"

@@ -1,0 +1,28 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "neogrok"
+path = "lib/lib.rs"
+
+[[bin]]
+name = "neogrokd"
+path = "src/main.rs"
+
+[dependencies]
+neogrok-protocol = { path = "../neogrok-protocol" }
+idpool = { path = "../idpool" }
+
+serde = { version = "1.0.148", features = ["derive"] }
+tokio = { workspace = true }
+toml = "0.5.9"
+
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+flume = { workspace = true }
+rustc-hash = { workspace = true }

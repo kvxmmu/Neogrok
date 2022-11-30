@@ -1,0 +1,13 @@
+[package]
+name = "neogrok-protocol"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+common = { path = "../common" }
+neogrok-compression = { path = "../neogrok-compression" }
+
+tokio = { workspace = true }
+thiserror = { workspace = true }

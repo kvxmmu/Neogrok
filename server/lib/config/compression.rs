@@ -1,0 +1,52 @@
+use {
+    neogrok_protocol::{
+        compression::polymorphic::{
+            BufCompressor,
+            BufDecompressor,
+        },
+        protocol::types::CompressionAlgorithm,
+    },
+    serde::Deserialize,
+};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CfgCompressionAlgorithm {
+    Deflate,
+    ZStd,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CompressionData {
+    pub level: u8,
+    pub algorithm: CfgCompressionAlgorithm,
+    pub threshold: u16,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CompressionCfg {
+    pub default: CompressionData,
+}
+
+impl CfgCompressionAlgorithm {
+    pub fn to_protocol(self) -> CompressionAlgorithm {
+        match self {
+            Self::Deflate => CompressionAlgorithm::Deflate,
+            Self::ZStd => CompressionAlgorithm::ZStd,
+        }
+    }
+}
+
+impl CompressionData {
+    pub fn to_pair(&self) -> (BufCompressor, BufDecompressor) {
+        match self.algorithm {
+            CfgCompressionAlgorithm::Deflate => (
+                BufCompressor::deflate(self.level),
+                BufDecompressor::deflate(),
+            ),
+            CfgCompressionAlgorithm::ZStd => {
+                (BufCompressor::zstd(self.level), BufDecompressor::zstd())
+            }
+        }
+    }
+}
