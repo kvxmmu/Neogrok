@@ -31,9 +31,9 @@ where
 
         MasterCommand::Disconnected { id } => {
             tracing::info!(?id, "disconnected");
-            writer.write_disconnect(id).await?;
 
             state.remove_slave(id);
+            writer.write_disconnect(id).await?;
         }
     }
     Ok(())

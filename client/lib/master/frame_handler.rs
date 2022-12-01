@@ -41,6 +41,8 @@ where
                     tracing::error!(?error, "failed to disconnect client");
                 }
             }
+
+            state.remove_slave(id);
         }
 
         Frame::Connect { id } => {
