@@ -32,6 +32,9 @@ pub enum ReadError {
 
     #[error("invalid network protocol")]
     InvalidProtocol,
+
+    #[error("Too long buffer size")]
+    TooLongBuffer,
 }
 
 impl From<io::Error> for ReadError {

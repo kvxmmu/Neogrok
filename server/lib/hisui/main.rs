@@ -38,6 +38,8 @@ pub async fn listen_hisui_client<Reader, Writer>(
 
     config: Arc<Config>,
     address: SocketAddr,
+
+    buffer_read: usize,
 ) where
     Reader: AsyncReadExt + Unpin,
     Writer: AsyncWriteExt + Unpin,
@@ -100,7 +102,8 @@ pub async fn listen_hisui_client<Reader, Writer>(
 
                 let frame = match reader.read_frame(
                     pkt_type,
-                    flags
+                    flags,
+                    buffer_read,
                 ).await {
                     Ok(f) => f,
                     Err(e) => {

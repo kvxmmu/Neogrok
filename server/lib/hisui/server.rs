@@ -17,7 +17,13 @@ use {
         io,
         sync::Arc,
     },
-    tokio::net::TcpListener,
+    tokio::{
+        io::{
+            AsyncRead,
+            BufReader,
+        },
+        net::TcpListener,
+    },
 };
 
 pub async fn listen_hisui(config: Arc<Config>) -> io::Result<()> {
@@ -35,26 +41,39 @@ pub async fn listen_hisui(config: Arc<Config>) -> io::Result<()> {
         }
 
         let config = Arc::clone(&config);
+        let buffer_read = config.server.buffer.read;
+
         tokio::spawn(async move {
             let (reader, writer) = stream.split();
             let (comp, decomp) = config.compression.default.to_pair();
-            let (reader, writer) =
-                create_rw_handles(reader, writer, comp, decomp);
+            let (reader, writer) = create_rw_handles(
+                reader,
+                writer,
+                comp,
+                decomp,
+                buffer_read,
+            );
 
-            listen_hisui_client(reader, writer, config, addr).await;
+            listen_hisui_client(reader, writer, config, addr, buffer_read)
+                .await;
             tracing::info!(?addr, "disconnected from the main server");
         });
     }
 }
 
-fn create_rw_handles<Reader, Writer>(
+fn create_rw_handles<Reader: AsyncRead, Writer>(
     reader: Reader,
     writer: Writer,
 
     compressor: BufCompressor,
     decompressor: BufDecompressor,
-) -> (HisuiReader<Reader>, HisuiWriter<Writer>) {
-    let reader = HisuiReader::server(reader, decompressor);
+
+    buffer_size: usize,
+) -> (HisuiReader<BufReader<Reader>>, HisuiWriter<Writer>) {
+    let reader = HisuiReader::server(
+        BufReader::with_capacity(buffer_size, reader),
+        decompressor,
+    );
     let writer = HisuiWriter::new(writer, compressor);
 
     (reader, writer)

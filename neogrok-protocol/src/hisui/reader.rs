@@ -45,15 +45,18 @@ where
 {
     pub async fn read_frame_inconcurrent(
         &mut self,
+        max_fwd_buffer: usize,
     ) -> Result<Frame, ReadError> {
         let (pkt_type, flags) = self.read_packet_type().await?;
-        self.read_frame(pkt_type, flags).await
+        self.read_frame(pkt_type, flags, max_fwd_buffer)
+            .await
     }
 
     pub async fn read_frame(
         &mut self,
         pkt_type: u8,
         flags: PacketFlags,
+        max_fwd_buffer: usize,
     ) -> Result<Frame, ReadError> {
         Ok(match pkt_type {
             Frame::SERVER if self.side == CodecSide::Server => {
@@ -90,8 +93,13 @@ where
             Frame::FORWARD => {
                 let id = self.read_client_id(flags).await?;
                 let length = self.read_length(flags).await? as usize;
+                if length > max_fwd_buffer {
+                    self.skip_n_bytes(length).await?;
+                    return Err(ReadError::TooLongBuffer);
+                }
+
                 let buffer = self
-                    .read_fwd_payload(length, flags, length << 1)
+                    .read_fwd_payload(length, flags, max_fwd_buffer)
                     .await?;
 
                 Frame::Forward { id, buffer }
@@ -171,6 +179,35 @@ where
         Ok(Compression { algorithm, level })
     }
 
+    async fn skip_n_bytes(&mut self, size: usize) -> io::Result<()> {
+        let mut buf = [0; 64];
+        let mut skipped = 0;
+
+        while skipped < size {
+            let read = self
+                .inner
+                .read(&mut buf[..(size - skipped).min(64)])
+                .await?;
+            skipped += read;
+        }
+
+        Ok(())
+    }
+
+    fn try_decompress(
+        &mut self,
+        input: &[u8],
+        max_size: usize,
+    ) -> Option<Vec<u8>> {
+        let length = input.len() << 1;
+
+        if let Some(buf) = self.decompressor.decompress(input, length) {
+            Some(buf)
+        } else {
+            self.decompressor.decompress(input, max_size)
+        }
+    }
+
     async fn read_fwd_payload(
         &mut self,
         length: usize,
@@ -178,10 +215,9 @@ where
         max_size: usize,
     ) -> Result<Vec<u8>, ReadError> {
         let mut buffer = self.read_exact(length).await?;
+
         if flags.contains(PacketFlags::COMPRESSED) {
-            if let Some(buf) =
-                self.decompressor.decompress(&buffer, max_size)
-            {
+            if let Some(buf) = self.try_decompress(&buffer, max_size) {
                 buffer = buf;
             } else {
                 return Err(ReadError::FailedToDecompress);
