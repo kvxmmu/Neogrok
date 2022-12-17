@@ -1,12 +1,11 @@
-use {
-    super::{
-        reader::HisuiReader,
-        writer::HisuiWriter,
-    },
-    neogrok_compression::polymorphic::{
-        BufCompressor,
-        BufDecompressor,
-    },
+use neogrok_compression::polymorphic::{
+    BufCompressor,
+    BufDecompressor,
+};
+
+use super::{
+    reader::HisuiReader,
+    writer::HisuiWriter,
 };
 
 pub fn replace_compression<Reader, Writer>(

@@ -1,8 +1,7 @@
-use {
-    common::protocol::types::PacketFlags,
-    std::io,
-    thiserror::Error,
-};
+use std::io;
+
+use common::protocol::types::PacketFlags;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ReadError {

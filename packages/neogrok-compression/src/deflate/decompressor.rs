@@ -1,19 +1,19 @@
-use {
-    crate::error::{
-        DecompressorError,
-        DecompressorInitResult,
-    },
-    libdeflate_sys::{
-        libdeflate_alloc_decompressor,
-        libdeflate_decompressor,
-        libdeflate_deflate_decompress,
-        libdeflate_free_decompressor,
-        libdeflate_result_LIBDEFLATE_SUCCESS,
-    },
-    std::{
-        ffi,
-        ptr::NonNull,
-    },
+use std::{
+    ffi,
+    ptr::NonNull,
+};
+
+use libdeflate_sys::{
+    libdeflate_alloc_decompressor,
+    libdeflate_decompressor,
+    libdeflate_deflate_decompress,
+    libdeflate_free_decompressor,
+    libdeflate_result_LIBDEFLATE_SUCCESS,
+};
+
+use crate::error::{
+    DecompressorError,
+    DecompressorInitResult,
 };
 
 pub struct DeflateDecompressor {

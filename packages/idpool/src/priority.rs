@@ -1,10 +1,9 @@
-use {
-    num::Integer,
-    std::{
-        collections::BinaryHeap,
-        marker::PhantomData,
-    },
+use std::{
+    collections::BinaryHeap,
+    marker::PhantomData,
 };
+
+use num::Integer;
 
 macro_rules! impl_trait {
     ($trait:ident, $for:ty) => {

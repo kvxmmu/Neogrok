@@ -1,7 +1,6 @@
-use {
-    std::io,
-    thiserror::Error,
-};
+use std::io;
+
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ConfigLoadError {

@@ -1,15 +1,14 @@
-use {
-    super::codec_utils::encode_request_server_header,
-    crate::hisui::{
-        codec_utils::{
-            encode_client_header,
-            encode_fwd_header,
-            encode_type,
-            just_type,
-        },
-        frame::Frame,
+use common::protocol::types::*;
+
+use super::codec_utils::encode_request_server_header;
+use crate::hisui::{
+    codec_utils::{
+        encode_client_header,
+        encode_fwd_header,
+        encode_type,
+        just_type,
     },
-    common::protocol::types::*,
+    frame::Frame,
 };
 
 #[test]

@@ -1,20 +1,20 @@
-use {
-    crate::error::{
-        DecompressorError,
-        DecompressorInitResult,
-    },
-    std::{
-        ffi,
-        ptr::NonNull,
-    },
-    zstd_sys::{
-        ZSTD_DCtx,
-        ZSTD_createDCtx,
-        ZSTD_decompressDCtx,
-        ZSTD_freeDCtx,
-        ZSTD_getDecompressedSize,
-        ZSTD_isError,
-    },
+use std::{
+    ffi,
+    ptr::NonNull,
+};
+
+use zstd_sys::{
+    ZSTD_DCtx,
+    ZSTD_createDCtx,
+    ZSTD_decompressDCtx,
+    ZSTD_freeDCtx,
+    ZSTD_getDecompressedSize,
+    ZSTD_isError,
+};
+
+use crate::error::{
+    DecompressorError,
+    DecompressorInitResult,
 };
 
 pub struct ZStdDctx {

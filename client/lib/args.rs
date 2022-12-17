@@ -1,9 +1,8 @@
-use {
-    clap::{
-        Parser,
-        Subcommand,
-    },
-    std::num::NonZeroUsize,
+use std::num::NonZeroUsize;
+
+use clap::{
+    Parser,
+    Subcommand,
 };
 
 #[derive(Debug, Subcommand)]

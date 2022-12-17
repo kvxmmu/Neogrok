@@ -1,34 +1,34 @@
-use {
-    super::{
-        error::ReadError,
-        frame::{
-            Compression,
-            Frame,
-        },
+use std::{
+    future::{
+        poll_fn,
+        Future,
     },
-    common::protocol::{
-        error::ProtocolError,
-        types::{
-            CodecSide,
-            CompressionAlgorithm,
-            PacketFlags,
-            Protocol,
-            Rights,
-        },
+    io,
+    pin::Pin,
+};
+
+use common::protocol::{
+    error::ProtocolError,
+    types::{
+        CodecSide,
+        CompressionAlgorithm,
+        PacketFlags,
+        Protocol,
+        Rights,
     },
-    neogrok_compression::polymorphic::BufDecompressor,
-    std::{
-        future::{
-            poll_fn,
-            Future,
-        },
-        io,
-        pin::Pin,
-    },
-    tokio::io::{
-        AsyncRead,
-        AsyncReadExt,
-        ReadBuf,
+};
+use neogrok_compression::polymorphic::BufDecompressor;
+use tokio::io::{
+    AsyncRead,
+    AsyncReadExt,
+    ReadBuf,
+};
+
+use super::{
+    error::ReadError,
+    frame::{
+        Compression,
+        Frame,
     },
 };
 

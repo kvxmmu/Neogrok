@@ -1,15 +1,13 @@
-use {
-    clap::Parser,
-    neo::{
-        args::Args,
-        master::listener::run_listener,
-    },
-    tokio::{
-        net::TcpStream,
-        runtime::Builder,
-    },
-    tracing::Level,
+use clap::Parser;
+use neo::{
+    args::Args,
+    master::listener::run_listener,
 };
+use tokio::{
+    net::TcpStream,
+    runtime::Builder,
+};
+use tracing::Level;
 
 async fn connect_and_start(args: Args) -> anyhow::Result<()> {
     let address = &args.remote;

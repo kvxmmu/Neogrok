@@ -1,29 +1,29 @@
-use {
-    crate::{
-        config::Config,
-        hisui::main::listen_hisui_client,
+use std::{
+    io,
+    sync::Arc,
+};
+
+use neogrok_protocol::{
+    compression::algorithms::polymorphic::{
+        BufCompressor,
+        BufDecompressor,
     },
-    neogrok_protocol::{
-        compression::algorithms::polymorphic::{
-            BufCompressor,
-            BufDecompressor,
-        },
-        hisui::{
-            reader::HisuiReader,
-            writer::HisuiWriter,
-        },
+    hisui::{
+        reader::HisuiReader,
+        writer::HisuiWriter,
     },
-    std::{
-        io,
-        sync::Arc,
+};
+use tokio::{
+    io::{
+        AsyncRead,
+        BufReader,
     },
-    tokio::{
-        io::{
-            AsyncRead,
-            BufReader,
-        },
-        net::TcpListener,
-    },
+    net::TcpListener,
+};
+
+use crate::{
+    config::Config,
+    hisui::main::listen_hisui_client,
 };
 
 pub async fn listen_hisui(config: Arc<Config>) -> io::Result<()> {

@@ -1,39 +1,38 @@
-use {
-    super::state::State,
-    crate::{
-        args::{
-            Args,
-            Command,
-        },
-        master::{
-            command_handler::handle_command,
-            frame_handler::handle_frame,
-        },
+use neogrok_protocol::{
+    compression::algorithms::polymorphic::{
+        BufCompressor,
+        BufDecompressor,
     },
-    neogrok_protocol::{
-        compression::algorithms::polymorphic::{
-            BufCompressor,
-            BufDecompressor,
-        },
-        hisui::{
-            frame::Frame,
-            reader::HisuiReader,
-            utils::replace_compression,
-            writer::HisuiWriter,
-        },
-        protocol::types::{
-            CompressionAlgorithm,
-            Protocol,
-            Rights,
-        },
+    hisui::{
+        frame::Frame,
+        reader::HisuiReader,
+        utils::replace_compression,
+        writer::HisuiWriter,
     },
-    tokio::{
-        io::{
-            AsyncReadExt,
-            AsyncWriteExt,
-            BufReader,
-        },
-        net::TcpStream,
+    protocol::types::{
+        CompressionAlgorithm,
+        Protocol,
+        Rights,
+    },
+};
+use tokio::{
+    io::{
+        AsyncReadExt,
+        AsyncWriteExt,
+        BufReader,
+    },
+    net::TcpStream,
+};
+
+use super::state::State;
+use crate::{
+    args::{
+        Args,
+        Command,
+    },
+    master::{
+        command_handler::handle_command,
+        frame_handler::handle_frame,
     },
 };
 

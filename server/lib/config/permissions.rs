@@ -1,7 +1,5 @@
-use {
-    neogrok_protocol::protocol::types::Rights,
-    serde::Deserialize,
-};
+use neogrok_protocol::protocol::types::Rights;
+use serde::Deserialize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 pub struct ProtocolEntry {

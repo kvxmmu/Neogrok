@@ -1,31 +1,31 @@
-use {
-    crate::{
-        commands::MasterCommand,
-        config::Config,
-        hisui::{
-            handlers::{
-                command::*,
-                error::*,
-                frame::*,
-            },
-            state::State,
+use std::{
+    net::SocketAddr,
+    sync::Arc,
+};
+
+use neogrok_protocol::hisui::{
+    error::ReadError,
+    reader::HisuiReader,
+    writer::HisuiWriter,
+};
+use tokio::io::{
+    AsyncReadExt,
+    AsyncWriteExt,
+};
+
+use crate::{
+    commands::MasterCommand,
+    config::Config,
+    hisui::{
+        handlers::{
+            command::*,
+            error::*,
+            frame::*,
         },
-        infinite_future::infinite_future,
-        user::User,
+        state::State,
     },
-    neogrok_protocol::hisui::{
-        error::ReadError,
-        reader::HisuiReader,
-        writer::HisuiWriter,
-    },
-    std::{
-        net::SocketAddr,
-        sync::Arc,
-    },
-    tokio::io::{
-        AsyncReadExt,
-        AsyncWriteExt,
-    },
+    infinite_future::infinite_future,
+    user::User,
 };
 
 pub async fn listen_hisui_client<Reader, Writer>(

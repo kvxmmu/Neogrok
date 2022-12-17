@@ -1,24 +1,24 @@
-use {
-    crate::{
-        commands::{
-            MasterCommand,
-            ShutdownToken,
-        },
-        proxy::client::run_tcp_client,
+use std::{
+    net::SocketAddr,
+    sync::Arc,
+};
+
+use flume::Sender;
+use idpool::prelude::FlatIdPool;
+use tokio::{
+    net::TcpListener,
+    sync::{
+        oneshot,
+        Mutex,
     },
-    flume::Sender,
-    idpool::prelude::FlatIdPool,
-    std::{
-        net::SocketAddr,
-        sync::Arc,
+};
+
+use crate::{
+    commands::{
+        MasterCommand,
+        ShutdownToken,
     },
-    tokio::{
-        net::TcpListener,
-        sync::{
-            oneshot,
-            Mutex,
-        },
-    },
+    proxy::client::run_tcp_client,
 };
 
 pub async fn run_tcp_listener(

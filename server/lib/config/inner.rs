@@ -1,14 +1,14 @@
-use {
-    super::{
-        compression::CompressionCfg,
-        error::ConfigLoadError,
-        permissions::PermissionsCfg,
-    },
-    serde::Deserialize,
-    std::{
-        fs,
-        path::Path,
-    },
+use std::{
+    fs,
+    path::Path,
+};
+
+use serde::Deserialize;
+
+use super::{
+    compression::CompressionCfg,
+    error::ConfigLoadError,
+    permissions::PermissionsCfg,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]

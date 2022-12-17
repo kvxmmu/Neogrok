@@ -1,16 +1,15 @@
-use {
-    neogrok::{
-        config::Config,
-        hisui::server::listen_hisui,
-    },
-    std::{
-        io,
-        sync::Arc,
-    },
-    tokio::runtime::Builder,
-    tracing::Level,
-    tracing_subscriber::FmtSubscriber,
+use std::{
+    io,
+    sync::Arc,
 };
+
+use neogrok::{
+    config::Config,
+    hisui::server::listen_hisui,
+};
+use tokio::runtime::Builder;
+use tracing::Level;
+use tracing_subscriber::FmtSubscriber;
 
 fn load_cfg() -> Result<Config, Vec<&'static str>> {
     let paths = vec![

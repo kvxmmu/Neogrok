@@ -1,36 +1,36 @@
-use {
-    crate::{
-        commands::SlaveCommand,
-        config::{
-            compression::CompressionData,
-            Config,
-        },
-        hisui::state::{
-            SendResult,
-            State,
-        },
-        proxy::listener::run_tcp_listener,
-        user::User,
+use std::{
+    io,
+    net::SocketAddr,
+    sync::Arc,
+};
+
+use neogrok_protocol::{
+    hisui::{
+        frame::Frame,
+        writer::HisuiWriter,
     },
-    neogrok_protocol::{
-        hisui::{
-            frame::Frame,
-            writer::HisuiWriter,
-        },
-        protocol::{
-            error::ProtocolError,
-            types::Rights,
-        },
+    protocol::{
+        error::ProtocolError,
+        types::Rights,
     },
-    std::{
-        io,
-        net::SocketAddr,
-        sync::Arc,
+};
+use tokio::{
+    io::AsyncWriteExt,
+    net::TcpListener,
+};
+
+use crate::{
+    commands::SlaveCommand,
+    config::{
+        compression::CompressionData,
+        Config,
     },
-    tokio::{
-        io::AsyncWriteExt,
-        net::TcpListener,
+    hisui::state::{
+        SendResult,
+        State,
     },
+    proxy::listener::run_tcp_listener,
+    user::User,
 };
 
 macro_rules! with_server {

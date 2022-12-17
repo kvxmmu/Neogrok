@@ -1,19 +1,19 @@
-use {
-    crate::error::{
-        CompressorInitError,
-        CompressorInitResult,
-    },
-    std::{
-        ffi,
-        ptr::NonNull,
-    },
-    zstd_sys::{
-        ZSTD_CCtx,
-        ZSTD_compressCCtx,
-        ZSTD_createCCtx,
-        ZSTD_freeCCtx,
-        ZSTD_isError,
-    },
+use std::{
+    ffi,
+    ptr::NonNull,
+};
+
+use zstd_sys::{
+    ZSTD_CCtx,
+    ZSTD_compressCCtx,
+    ZSTD_createCCtx,
+    ZSTD_freeCCtx,
+    ZSTD_isError,
+};
+
+use crate::error::{
+    CompressorInitError,
+    CompressorInitResult,
 };
 
 pub struct ZStdCctx {

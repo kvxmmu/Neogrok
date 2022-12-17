@@ -1,14 +1,14 @@
-use {
-    crate::{
-        commands::MasterCommand,
-        hisui::state::State,
-    },
-    neogrok_protocol::{
-        compression::types::CompressionStrategy,
-        hisui::writer::HisuiWriter,
-    },
-    std::net::SocketAddr,
-    tokio::io::AsyncWriteExt,
+use std::net::SocketAddr;
+
+use neogrok_protocol::{
+    compression::types::CompressionStrategy,
+    hisui::writer::HisuiWriter,
+};
+use tokio::io::AsyncWriteExt;
+
+use crate::{
+    commands::MasterCommand,
+    hisui::state::State,
 };
 
 #[must_use]

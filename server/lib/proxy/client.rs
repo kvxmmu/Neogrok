@@ -1,19 +1,18 @@
-use {
-    crate::commands::{
-        MasterCommand,
-        SlaveCommand,
+use flume::{
+    Receiver,
+    Sender,
+};
+use tokio::{
+    io::{
+        AsyncReadExt,
+        AsyncWriteExt,
     },
-    flume::{
-        Receiver,
-        Sender,
-    },
-    tokio::{
-        io::{
-            AsyncReadExt,
-            AsyncWriteExt,
-        },
-        net::TcpStream,
-    },
+    net::TcpStream,
+};
+
+use crate::commands::{
+    MasterCommand,
+    SlaveCommand,
 };
 
 pub async fn run_tcp_client(

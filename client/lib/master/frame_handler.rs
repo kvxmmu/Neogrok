@@ -1,17 +1,16 @@
-use {
-    super::state::{
-        SendResult,
-        State,
-    },
-    crate::{
-        commands::SlaveCommand,
-        slave::listener::run_client,
-    },
-    neogrok_protocol::hisui::{
-        frame::Frame,
-        writer::HisuiWriter,
-    },
-    tokio::io::AsyncWriteExt,
+use neogrok_protocol::hisui::{
+    frame::Frame,
+    writer::HisuiWriter,
+};
+use tokio::io::AsyncWriteExt;
+
+use super::state::{
+    SendResult,
+    State,
+};
+use crate::{
+    commands::SlaveCommand,
+    slave::listener::run_client,
 };
 
 pub async fn handle_frame<Writer>(

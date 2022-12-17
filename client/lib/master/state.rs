@@ -1,13 +1,12 @@
-use {
-    crate::commands::{
-        MasterCommand,
-        SlaveCommand,
-    },
-    flume::{
-        Receiver,
-        Sender,
-    },
-    rustc_hash::FxHashMap,
+use flume::{
+    Receiver,
+    Sender,
+};
+use rustc_hash::FxHashMap;
+
+use crate::commands::{
+    MasterCommand,
+    SlaveCommand,
 };
 
 #[must_use]

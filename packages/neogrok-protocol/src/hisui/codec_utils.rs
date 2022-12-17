@@ -1,7 +1,6 @@
-use {
-    super::frame::Frame,
-    common::protocol::types::*,
-};
+use common::protocol::types::*;
+
+use super::frame::Frame;
 
 pub(crate) fn encode_request_server_header(
     port: u16,

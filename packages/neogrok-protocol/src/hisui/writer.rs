@@ -1,30 +1,30 @@
-use {
-    super::{
-        codec_utils::{
-            encode_client_header,
-            encode_fwd_header,
-            encode_request_server_header,
-            just_type,
-        },
-        frame::Frame,
+use std::{
+    future::Future,
+    io::{
+        self,
+        IoSlice,
     },
-    crate::compression::types::{
-        CompressionStatus,
-        CompressionStrategy,
+};
+
+use common::protocol::{
+    error::ProtocolError,
+    types::*,
+};
+use neogrok_compression::polymorphic::BufCompressor;
+use tokio::io::AsyncWriteExt;
+
+use super::{
+    codec_utils::{
+        encode_client_header,
+        encode_fwd_header,
+        encode_request_server_header,
+        just_type,
     },
-    common::protocol::{
-        error::ProtocolError,
-        types::*,
-    },
-    neogrok_compression::polymorphic::BufCompressor,
-    std::{
-        future::Future,
-        io::{
-            self,
-            IoSlice,
-        },
-    },
-    tokio::io::AsyncWriteExt,
+    frame::Frame,
+};
+use crate::compression::types::{
+    CompressionStatus,
+    CompressionStrategy,
 };
 
 macro_rules! impl_writer {

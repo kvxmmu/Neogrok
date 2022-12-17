@@ -1,14 +1,13 @@
-use {
-    neogrok_protocol::hisui::{
-        error::ReadError,
-        writer::HisuiWriter,
-    },
-    std::{
-        io,
-        net::SocketAddr,
-    },
-    tokio::io::AsyncWriteExt,
+use std::{
+    io,
+    net::SocketAddr,
 };
+
+use neogrok_protocol::hisui::{
+    error::ReadError,
+    writer::HisuiWriter,
+};
+use tokio::io::AsyncWriteExt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ErrorType {

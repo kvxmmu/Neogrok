@@ -1,27 +1,27 @@
-use {
-    crate::{
-        commands::{
-            MasterCommand,
-            ShutdownToken,
-            SlaveCommand,
-        },
-        utils::cold_path,
+use std::{
+    mem,
+    sync::Arc,
+};
+
+use flume::{
+    unbounded,
+    Receiver,
+    Sender,
+};
+use idpool::prelude::FlatIdPool;
+use rustc_hash::FxHashMap;
+use tokio::sync::{
+    oneshot,
+    Mutex,
+};
+
+use crate::{
+    commands::{
+        MasterCommand,
+        ShutdownToken,
+        SlaveCommand,
     },
-    flume::{
-        unbounded,
-        Receiver,
-        Sender,
-    },
-    idpool::prelude::FlatIdPool,
-    rustc_hash::FxHashMap,
-    std::{
-        mem,
-        sync::Arc,
-    },
-    tokio::sync::{
-        oneshot,
-        Mutex,
-    },
+    utils::cold_path,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

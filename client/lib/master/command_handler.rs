@@ -1,12 +1,11 @@
-use {
-    super::state::State,
-    crate::commands::MasterCommand,
-    neogrok_protocol::{
-        compression::types::CompressionStrategy,
-        hisui::writer::HisuiWriter,
-    },
-    tokio::io::AsyncWriteExt,
+use neogrok_protocol::{
+    compression::types::CompressionStrategy,
+    hisui::writer::HisuiWriter,
 };
+use tokio::io::AsyncWriteExt;
+
+use super::state::State;
+use crate::commands::MasterCommand;
 
 pub async fn handle_command<Writer>(
     writer: &mut HisuiWriter<Writer>,
