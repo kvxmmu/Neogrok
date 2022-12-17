@@ -1,13 +1,13 @@
 use std::{
+    convert::Infallible,
     future::Future,
     task::Poll,
 };
 
-pub enum Bottom {}
 pub struct InfiniteFuture;
 
 impl Future for InfiniteFuture {
-    type Output = Bottom;
+    type Output = Infallible;
 
     fn poll(
         self: std::pin::Pin<&mut Self>,
@@ -17,6 +17,6 @@ impl Future for InfiniteFuture {
     }
 }
 
-pub const fn infinite_future() -> impl Future<Output = Bottom> {
+pub const fn infinite_future() -> impl Future<Output = Infallible> {
     InfiniteFuture
 }
