@@ -62,7 +62,7 @@ pub async fn run_tcp_listener(
                     break;
                 };
 
-                let master = master.clone();
+                let master = Sender::clone(&master);
                 let pool = Arc::clone(&pool);
                 tokio::spawn(async move {
                     run_tcp_client(
