@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 libdeflate-sys = "0.11.0"
-zstd-sys = { version = "2.0.1", default-features = false, features = [
+zstd-sys = { version = "2.0.4", default-features = false, features = [
     "thin",
     "std",
 ] }

@@ -14,7 +14,7 @@ flume = { version = "0.10.14", default-features = false, features = [
 ] }
 rustc-hash = "1.1.0"
 
-tokio = { version = "1.22.0", default-features = false, features = [
+tokio = { version = "1.23.0", default-features = false, features = [
     "net",
     "sync",
     "rt",

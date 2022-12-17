@@ -17,9 +17,9 @@ path = "src/main.rs"
 neogrok-protocol = { path = "../packages/neogrok-protocol" }
 idpool = { path = "../packages/idpool" }
 
-serde = { version = "1.0.148", features = ["derive"] }
+serde = { version = "1.0.151", features = ["derive"] }
 tokio = { workspace = true }
-toml = "0.5.9"
+toml = "0.5.10"
 
 thiserror = { workspace = true }
 tracing = { workspace = true }
