@@ -6,13 +6,15 @@ use std::{
 use num::Integer;
 
 macro_rules! impl_trait {
-    ($trait:ident, $for:ty) => {
-        impl $trait for $for {
-            #[inline(always)]
-            fn reverse(self) -> Self {
-                Self::MAX - self
+    ($trait:ident, $($for:ty),*) => {
+        $(
+            impl $trait for $for {
+                #[inline(always)]
+                fn reverse(self) -> Self {
+                    Self::MAX - self
+                }
             }
-        }
+        )*
     };
 }
 
@@ -38,17 +40,11 @@ pub struct PriorityIdPool<T, Ordering> {
     ordering: PhantomData<Ordering>,
 }
 
-impl_trait!(ReverseExt, i8);
-impl_trait!(ReverseExt, i16);
-impl_trait!(ReverseExt, i32);
-impl_trait!(ReverseExt, i64);
-impl_trait!(ReverseExt, i128);
+// Signed
+impl_trait!(ReverseExt, i8, i16, i32, i64, i128);
 
-impl_trait!(ReverseExt, u8);
-impl_trait!(ReverseExt, u16);
-impl_trait!(ReverseExt, u32);
-impl_trait!(ReverseExt, u64);
-impl_trait!(ReverseExt, u128);
+// Unsigned
+impl_trait!(ReverseExt, u8, u16, u32, u64, u128);
 
 impl OrderingExt for LowToHigh {
     fn compute<T: ReverseExt>(val: T) -> T {
