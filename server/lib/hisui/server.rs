@@ -4,13 +4,13 @@ use {
         hisui::main::listen_hisui_client,
     },
     neogrok_protocol::{
+        compression::algorithms::polymorphic::{
+            BufCompressor,
+            BufDecompressor,
+        },
         hisui::{
             reader::HisuiReader,
             writer::HisuiWriter,
-        },
-        neogrok_compression::polymorphic::{
-            BufCompressor,
-            BufDecompressor,
         },
     },
     std::{

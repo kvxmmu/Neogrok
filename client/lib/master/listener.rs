@@ -11,15 +11,15 @@ use {
         },
     },
     neogrok_protocol::{
+        compression::algorithms::polymorphic::{
+            BufCompressor,
+            BufDecompressor,
+        },
         hisui::{
             frame::Frame,
             reader::HisuiReader,
             utils::replace_compression,
             writer::HisuiWriter,
-        },
-        neogrok_compression::polymorphic::{
-            BufCompressor,
-            BufDecompressor,
         },
         protocol::types::{
             CompressionAlgorithm,
