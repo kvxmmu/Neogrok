@@ -46,7 +46,7 @@ pub async fn listen_hisui_client<Reader, Writer>(
 {
     let compression_data = &config.compression.default;
     let mut user = User::new(config.permissions.base.to_protocol_rights());
-    let mut state = None;
+    let mut state: Option<State> = None;
 
     async fn wait_command(
         state: &mut Option<State>,
