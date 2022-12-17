@@ -1,6 +1,6 @@
 use {
     clap::Parser,
-    neogrok::{
+    neo::{
         args::Args,
         master::listener::run_listener,
     },

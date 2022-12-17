@@ -1,12 +1,5 @@
 [workspace]
-members = [
-    "common",
-    "neogrok-compression",
-    "neogrok-protocol",
-    "idpool",
-    "server",
-    "client",
-]
+members = ["packages/*", "server", "client"]
 
 [workspace.dependencies]
 tracing = "0.1.37"
