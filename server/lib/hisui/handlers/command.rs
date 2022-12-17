@@ -1,6 +1,8 @@
 use {
-    super::state::State,
-    crate::commands::MasterCommand,
+    crate::{
+        commands::MasterCommand,
+        hisui::state::State,
+    },
     neogrok_protocol::{
         compression::types::CompressionStrategy,
         hisui::writer::HisuiWriter,

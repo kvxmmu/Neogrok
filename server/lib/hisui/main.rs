@@ -3,15 +3,11 @@ use {
         commands::MasterCommand,
         config::Config,
         hisui::{
-            command_handler::{
-                handle_command,
-                CommandHandleResult,
+            handlers::{
+                command::*,
+                error::*,
+                frame::*,
             },
-            error_handler::{
-                handle_error,
-                ErrorType,
-            },
-            frame_handler::handle_frame,
             state::State,
         },
         infinite_future::infinite_future,

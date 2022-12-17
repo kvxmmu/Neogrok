@@ -1,13 +1,13 @@
 use {
-    super::state::{
-        SendResult,
-        State,
-    },
     crate::{
         commands::SlaveCommand,
         config::{
             compression::CompressionData,
             Config,
+        },
+        hisui::state::{
+            SendResult,
+            State,
         },
         proxy::listener::run_tcp_listener,
         user::User,
