@@ -7,11 +7,11 @@ use {
                 handle_command,
                 CommandHandleResult,
             },
-            frame_handler::{
+            error_handler::{
                 handle_error,
-                handle_frame,
                 ErrorType,
             },
+            frame_handler::handle_frame,
             state::State,
         },
         infinite_future::infinite_future,
