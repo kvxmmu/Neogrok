@@ -16,5 +16,4 @@ macro_rules! impl_transmute {
     };
 }
 
-pub mod compression;
 pub mod protocol;

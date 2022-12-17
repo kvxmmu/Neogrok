@@ -2,7 +2,7 @@ use {
     super::state::State,
     crate::commands::MasterCommand,
     neogrok_protocol::{
-        common_compression::types::CompressionStrategy,
+        compression::types::CompressionStrategy,
         hisui::writer::HisuiWriter,
     },
     std::net::SocketAddr,

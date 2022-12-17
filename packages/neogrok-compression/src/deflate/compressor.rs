@@ -1,5 +1,5 @@
 use {
-    common::compression::error::{
+    crate::error::{
         CompressorInitError,
         CompressorInitResult,
     },

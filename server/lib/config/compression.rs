@@ -1,6 +1,6 @@
 use {
     neogrok_protocol::{
-        compression::polymorphic::{
+        neogrok_compression::polymorphic::{
             BufCompressor,
             BufDecompressor,
         },

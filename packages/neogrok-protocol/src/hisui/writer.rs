@@ -8,15 +8,13 @@ use {
         },
         frame::Frame,
     },
-    common::{
-        compression::types::{
-            CompressionStatus,
-            CompressionStrategy,
-        },
-        protocol::{
-            error::ProtocolError,
-            types::*,
-        },
+    crate::compression::types::{
+        CompressionStatus,
+        CompressionStrategy,
+    },
+    common::protocol::{
+        error::ProtocolError,
+        types::*,
     },
     neogrok_compression::polymorphic::BufCompressor,
     std::{
