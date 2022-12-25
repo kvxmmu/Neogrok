@@ -4,6 +4,7 @@ use std::{
         Future,
     },
     io,
+    num::NonZeroUsize,
     pin::Pin,
 };
 
@@ -45,7 +46,7 @@ where
 {
     pub async fn read_frame_inconcurrent(
         &mut self,
-        max_fwd_buffer: usize,
+        max_fwd_buffer: Option<NonZeroUsize>,
     ) -> Result<Frame, ReadError> {
         let (pkt_type, flags) = self.read_packet_type().await?;
         self.read_frame(pkt_type, flags, max_fwd_buffer)
@@ -56,7 +57,7 @@ where
         &mut self,
         pkt_type: u8,
         flags: PacketFlags,
-        max_fwd_buffer: usize,
+        max_fwd_buffer: Option<NonZeroUsize>,
     ) -> Result<Frame, ReadError> {
         Ok(match pkt_type {
             Frame::SERVER if self.side == CodecSide::Server => {
@@ -93,9 +94,12 @@ where
             Frame::FORWARD => {
                 let id = self.read_client_id(flags).await?;
                 let length = self.read_length(flags).await? as usize;
-                if length > max_fwd_buffer {
-                    self.skip_n_bytes(length).await?;
-                    return Err(ReadError::TooLongBuffer);
+
+                if let Some(max_length) = max_fwd_buffer {
+                    if length > max_length.get() {
+                        self.skip_n_bytes(length).await?;
+                        return Err(ReadError::TooLongBuffer);
+                    }
                 }
 
                 let buffer = self
@@ -212,15 +216,41 @@ where
         &mut self,
         length: usize,
         flags: PacketFlags,
-        max_size: usize,
+        max_size: Option<NonZeroUsize>,
     ) -> Result<Vec<u8>, ReadError> {
         let mut buffer = self.read_exact(length).await?;
 
         if flags.contains(PacketFlags::COMPRESSED) {
-            if let Some(buf) = self.try_decompress(&buffer, max_size) {
-                buffer = buf;
-            } else {
-                return Err(ReadError::FailedToDecompress);
+            match max_size {
+                Some(s) => {
+                    let max_size = s.get();
+                    if let Some(buf) =
+                        self.try_decompress(&buffer, max_size)
+                    {
+                        buffer = buf;
+                    } else {
+                        return Err(ReadError::FailedToDecompress);
+                    }
+                }
+
+                // Try decompress until done
+                // TODO: handle invalid buffer cases, not
+                // only the insufficient buffer size
+                None => {
+                    let mut max_size = 4096_usize;
+                    let decompressed = loop {
+                        if let Some(buf) =
+                            self.try_decompress(&buffer, max_size)
+                        {
+                            break buf;
+                        }
+
+                        // max_size *= 1.5
+                        max_size = (max_size << 1) - (max_size >> 1);
+                    };
+
+                    buffer = decompressed;
+                }
             }
         }
 

@@ -36,8 +36,6 @@ use crate::{
     },
 };
 
-const BUF_SIZE: usize = 4096 << 1;
-
 async fn listen_to<Reader, Writer>(
     mut reader: HisuiReader<Reader>,
     mut writer: HisuiWriter<Writer>,
@@ -53,7 +51,7 @@ where
         tokio::select! {
             frame_type = reader.read_packet_type() => {
                 let (pkt_type, flags) = frame_type?;
-                let frame = reader.read_frame(pkt_type, flags, BUF_SIZE).await?;
+                let frame = reader.read_frame(pkt_type, flags, None).await?;
 
                 handle_frame(&mut writer, &mut state, frame, address).await?;
             }
@@ -130,7 +128,7 @@ async fn read_server_response<Reader>(
 where
     Reader: AsyncReadExt + Unpin,
 {
-    let frame = reader.read_frame_inconcurrent(BUF_SIZE).await?;
+    let frame = reader.read_frame_inconcurrent(None).await?;
     match frame {
         Frame::Error(error) => {
             tracing::error!(?error, "server creation failed");
@@ -148,7 +146,7 @@ async fn read_auth_state<Reader>(
 where
     Reader: AsyncReadExt + Unpin,
 {
-    let frame = reader.read_frame_inconcurrent(BUF_SIZE).await?;
+    let frame = reader.read_frame_inconcurrent(None).await?;
     match frame {
         Frame::UpdateRights { new_rights } => Ok(new_rights),
 
@@ -169,7 +167,7 @@ where
 {
     let pkt_type = reader.read_packet_type().await?;
     let frame = reader
-        .read_frame(pkt_type.0, pkt_type.1, BUF_SIZE)
+        .read_frame(pkt_type.0, pkt_type.1, None)
         .await?;
 
     assert!(matches!(&frame, Frame::PingResponse { .. }));
