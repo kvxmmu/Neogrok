@@ -26,10 +26,13 @@ where
 {
     Ok(match error {
         ReadError::Io(_) => ErrorType::NonFatalButDisconnect,
-        ReadError::FailedToDecompress => ErrorType::Fatal,
+        ReadError::FailedToDecompress(err) => {
+            tracing::error!(?err, "Failed to decompress compressed data");
+            ErrorType::Fatal
+        }
 
         err => {
-            tracing::error!(?err, "non-fatal error");
+            tracing::error!(?err, "Non-fatal error");
             ErrorType::NonFatal
         }
     })

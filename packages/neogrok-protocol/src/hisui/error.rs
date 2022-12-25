@@ -1,6 +1,7 @@
 use std::io;
 
 use common::protocol::types::PacketFlags;
+use neogrok_compression::error::DecompressError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -21,7 +22,7 @@ pub enum ReadError {
     InvalidErrorCode { code: u8 },
 
     #[error("failed to decompress forward payload")]
-    FailedToDecompress,
+    FailedToDecompress(#[from] DecompressError),
 
     #[error("failed to read compression details")]
     FailedToReadCompressionDetails,

@@ -211,11 +211,14 @@ where
     ) -> DecompressResult<Vec<u8>> {
         let length = input.len() << 1;
 
-        match self.decompressor.decompress(input, length) {
+        match self
+            .decompressor
+            .decompress_constrained(input, length)
+        {
             Ok(buffer) => Ok(buffer),
-            Err(DecompressError::InsufficientSpace) => {
-                self.decompressor.decompress(input, max_size)
-            }
+            Err(DecompressError::InsufficientSpace) => self
+                .decompressor
+                .decompress_constrained(input, max_size),
             Err(e) => Err(e),
         }
     }
@@ -232,33 +235,13 @@ where
             match max_size {
                 Some(s) => {
                     let max_size = s.get();
-                    if let Ok(buf) = self.try_decompress(&buffer, max_size)
-                    {
-                        buffer = buf;
-                    } else {
-                        return Err(ReadError::FailedToDecompress);
-                    }
+                    buffer = self.try_decompress(&buffer, max_size)?;
                 }
 
                 None => {
-                    let mut max_size = 4096_usize;
-                    let decompressed = loop {
-                        match self.try_decompress(&buffer, max_size) {
-                            Ok(b) => break b,
-                            Err(
-                                DecompressError::InvalidCompressedData,
-                            ) => {
-                                return Err(ReadError::FailedToDecompress)
-                            }
-
-                            _ => {}
-                        }
-
-                        // max_size *= 1.5
-                        max_size = (max_size << 1) - (max_size >> 1);
-                    };
-
-                    buffer = decompressed;
+                    buffer = self
+                        .decompressor
+                        .decompress_unconstrained(&buffer)?;
                 }
             }
         }
