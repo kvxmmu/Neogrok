@@ -3,6 +3,7 @@ use crate::{
         compressor::DeflateCompressor,
         decompressor::DeflateDecompressor,
     },
+    error::DecompressResult,
     zstd::{
         compressor::ZStdCctx,
         decompressor::ZStdDctx,
@@ -24,7 +25,7 @@ impl BufDecompressor {
         &mut self,
         src: &[u8],
         max_size: usize,
-    ) -> Option<Vec<u8>> {
+    ) -> DecompressResult<Vec<u8>> {
         match self {
             Self::ZStd(zstd) => zstd.decompress(src, max_size),
             Self::Deflate(deflate) => deflate.decompress(src, max_size),

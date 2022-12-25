@@ -13,6 +13,8 @@ use zstd_sys::{
 };
 
 use crate::error::{
+    DecompressError,
+    DecompressResult,
     DecompressorError,
     DecompressorInitResult,
 };
@@ -26,7 +28,7 @@ impl ZStdDctx {
         &mut self,
         in_buffer: &[u8],
         max_allocate_size: usize,
-    ) -> Option<Vec<u8>> {
+    ) -> DecompressResult<Vec<u8>> {
         let size = unsafe {
             ZSTD_getDecompressedSize(
                 in_buffer.as_ptr() as *const _,
@@ -34,7 +36,7 @@ impl ZStdDctx {
             )
         };
         if size == 0 || size > max_allocate_size as u64 {
-            return None;
+            return Err(DecompressError::InsufficientSpace);
         }
 
         unsafe {
@@ -54,10 +56,10 @@ impl ZStdDctx {
             }
 
             if ZSTD_isError(result) == 1 {
-                None
+                Err(DecompressError::InvalidCompressedData)
             } else {
                 buffer.set_len(result);
-                Some(buffer)
+                Ok(buffer)
             }
         }
     }

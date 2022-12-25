@@ -8,10 +8,13 @@ use libdeflate_sys::{
     libdeflate_decompressor,
     libdeflate_deflate_decompress,
     libdeflate_free_decompressor,
+    libdeflate_result_LIBDEFLATE_INSUFFICIENT_SPACE,
     libdeflate_result_LIBDEFLATE_SUCCESS,
 };
 
 use crate::error::{
+    DecompressError,
+    DecompressResult,
     DecompressorError,
     DecompressorInitResult,
 };
@@ -25,7 +28,7 @@ impl DeflateDecompressor {
         &mut self,
         buffer: &[u8],
         max_decompressed_size: usize,
-    ) -> Option<Vec<u8>> {
+    ) -> DecompressResult<Vec<u8>> {
         unsafe {
             let ptr = buffer.as_ptr();
             let mut out_buffer: Vec<u8> =
@@ -54,9 +57,13 @@ impl DeflateDecompressor {
                 }
 
                 out_buffer.set_len(actual_nbytes_ret);
-                Some(out_buffer)
+                Ok(out_buffer)
+            } else if result
+                != libdeflate_result_LIBDEFLATE_INSUFFICIENT_SPACE
+            {
+                Err(DecompressError::InvalidCompressedData)
             } else {
-                None
+                Err(DecompressError::InsufficientSpace)
             }
         }
     }

@@ -18,7 +18,13 @@ use common::protocol::{
         Rights,
     },
 };
-use neogrok_compression::polymorphic::BufDecompressor;
+use neogrok_compression::{
+    error::{
+        DecompressError,
+        DecompressResult,
+    },
+    polymorphic::BufDecompressor,
+};
 use tokio::io::{
     AsyncRead,
     AsyncReadExt,
@@ -202,13 +208,15 @@ where
         &mut self,
         input: &[u8],
         max_size: usize,
-    ) -> Option<Vec<u8>> {
+    ) -> DecompressResult<Vec<u8>> {
         let length = input.len() << 1;
 
-        if let Some(buf) = self.decompressor.decompress(input, length) {
-            Some(buf)
-        } else {
-            self.decompressor.decompress(input, max_size)
+        match self.decompressor.decompress(input, length) {
+            Ok(buffer) => Ok(buffer),
+            Err(DecompressError::InsufficientSpace) => {
+                self.decompressor.decompress(input, max_size)
+            }
+            Err(e) => Err(e),
         }
     }
 
@@ -224,8 +232,7 @@ where
             match max_size {
                 Some(s) => {
                     let max_size = s.get();
-                    if let Some(buf) =
-                        self.try_decompress(&buffer, max_size)
+                    if let Ok(buf) = self.try_decompress(&buffer, max_size)
                     {
                         buffer = buf;
                     } else {
@@ -233,16 +240,18 @@ where
                     }
                 }
 
-                // Try decompress until done
-                // TODO: handle invalid buffer cases, not
-                // only the insufficient buffer size
                 None => {
                     let mut max_size = 4096_usize;
                     let decompressed = loop {
-                        if let Some(buf) =
-                            self.try_decompress(&buffer, max_size)
-                        {
-                            break buf;
+                        match self.try_decompress(&buffer, max_size) {
+                            Ok(b) => break b,
+                            Err(
+                                DecompressError::InvalidCompressedData,
+                            ) => {
+                                return Err(ReadError::FailedToDecompress)
+                            }
+
+                            _ => {}
                         }
 
                         // max_size *= 1.5
