@@ -3,17 +3,18 @@ use std::{
     net::SocketAddr,
 };
 
+use neogrok_declmacro::define_integral_enums;
 use neogrok_protocol::hisui::{
     error::ReadError,
     writer::HisuiWriter,
 };
 use tokio::io::AsyncWriteExt;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ErrorType {
-    NonFatal,
-    NonFatalButDisconnect,
-    Fatal,
+define_integral_enums! {
+    @easy ErrorType =
+        NonFatal,
+        NonFatalButDisconnect,
+        Fatal;
 }
 
 pub async fn handle_error<Writer>(

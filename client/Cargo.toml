@@ -21,6 +21,7 @@ flume = { workspace = true }
 rustc-hash = { workspace = true }
 
 neogrok-protocol = { path = "../packages/neogrok-protocol" }
+neogrok-declmacro = { path = "../packages/neogrok-declmacro" }
 
 clap = { version = "4.0.29", features = ["derive"] }
 anyhow = "1.0.66"

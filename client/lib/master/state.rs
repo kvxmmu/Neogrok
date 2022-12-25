@@ -2,6 +2,7 @@ use flume::{
     Receiver,
     Sender,
 };
+use neogrok_declmacro::define_integral_enums;
 use rustc_hash::FxHashMap;
 
 use crate::commands::{
@@ -9,12 +10,8 @@ use crate::commands::{
     SlaveCommand,
 };
 
-#[must_use]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum SendResult {
-    Ok,
-    NotFound,
-    Closed,
+define_integral_enums! {
+    @easy SendResult = Ok, NotFound, Closed;
 }
 
 pub struct State {
