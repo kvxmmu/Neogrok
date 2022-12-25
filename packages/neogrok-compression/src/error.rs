@@ -1,31 +1,26 @@
-use thiserror::Error;
+use neogrok_declmacro::{
+    compress::define_copyable_compress_errors,
+    define_results,
+};
 
-pub type CompressorInitResult<T> = Result<T, CompressorInitError>;
-pub type DecompressorInitResult<T> = Result<T, DecompressorError>;
-pub type DecompressResult<T> = Result<T, DecompressError>;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-pub enum DecompressError {
-    #[error("Got invalid compressed data")]
-    InvalidCompressedData,
-
-    #[error(
-        "Insufficient destination buffer size for the compressed data"
-    )]
-    InsufficientSpace,
+define_results! {
+    CompressorInitResult<T>   = <CompressorInitError>,
+    DecompressorInitResult<T> = <DecompressorError>,
+    DecompressResult<T>       = <DecompressError>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-pub enum DecompressorError {
-    #[error("failed to allocate decompressor")]
-    FailedToAllocate,
-}
+define_copyable_compress_errors! {
+    enum DecompressError {
+        InvalidCompressedData = "Got invalid compressed data",
+        InsufficientSpace = "Insufficient destination buffer size for the compressed data",
+    }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
-pub enum CompressorInitError {
-    #[error("failed to allocate compressor")]
-    FailedToAllocate,
+    enum DecompressorError {
+        FailedToAllocate = "Failed to allocate decompressor"
+    }
 
-    #[error("Invalid compression level specified")]
-    InvalidCompressionLevel,
+    enum CompressorInitError {
+        FailedToAllocate = "Failed to allocate compressor",
+        InvalidCompressionLevel = "Invalid compression level specified"
+    }
 }

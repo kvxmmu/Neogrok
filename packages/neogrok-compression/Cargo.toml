@@ -12,4 +12,5 @@ zstd-sys = { version = "2.0.4", default-features = false, features = [
     "std",
 ] }
 
+neogrok-declmacro = { path = "../neogrok-declmacro" }
 thiserror = { workspace = true }
