@@ -1,32 +1,26 @@
 use bitflags::bitflags;
+use integral_enum::IntegralEnum;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(IntegralEnum)]
 #[repr(u8)]
 pub enum CompressionAlgorithm {
     Deflate = 0,
     ZStd = 1,
-
-    Reserved,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(IntegralEnum)]
 #[repr(u8)]
 pub enum Protocol {
     Tcp = 0,
     Udp = 1,
-
-    Reserved,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(IntegralEnum)]
 #[repr(u8)]
 pub enum CodecSide {
     Client = 0,
     Server = 1,
 }
-
-impl_transmute!(CompressionAlgorithm);
-impl_transmute!(Protocol);
 
 bitflags! {
     #[repr(transparent)]

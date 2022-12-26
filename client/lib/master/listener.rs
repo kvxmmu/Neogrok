@@ -94,7 +94,6 @@ pub async fn run_listener(
             BufCompressor::zstd(compression.level),
             BufDecompressor::zstd(),
         ),
-        CompressionAlgorithm::Reserved => unreachable!(),
     };
 
     replace_compression(&mut reader, &mut writer, comp, decomp);

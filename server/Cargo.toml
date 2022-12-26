@@ -28,3 +28,4 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 flume = { workspace = true }
 rustc-hash = { workspace = true }
+integral-enum = { workspace = true }

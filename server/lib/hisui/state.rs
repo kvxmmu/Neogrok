@@ -9,6 +9,7 @@ use flume::{
     Sender,
 };
 use idpool::prelude::FlatIdPool;
+use integral_enum::IntegralEnum;
 use rustc_hash::FxHashMap;
 use tokio::sync::{
     oneshot,
@@ -24,11 +25,12 @@ use crate::{
     utils::cold_path,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(IntegralEnum)]
+#[repr(u8)]
 pub enum SendResult {
-    Ok,
-    NoSuchClient,
-    Closed,
+    Ok = 0,
+    NoSuchClient = 1,
+    Closed = 2,
 }
 
 pub struct State {

@@ -27,8 +27,6 @@ pub(crate) fn encode_request_server_header(
         Protocol::Udp => {
             flags |= PacketFlags::COMPRESSED;
         }
-
-        Protocol::Reserved => unreachable!(),
     };
 
     hdr[0] = encode_type(Frame::SERVER, flags);

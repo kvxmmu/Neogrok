@@ -1,7 +1,9 @@
+use integral_enum::IntegralEnum;
 use thiserror::Error;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[derive(Debug, IntegralEnum, Error)]
 #[repr(u8)]
+#[no_display]
 pub enum ProtocolError {
     #[error("functionality currently is not implemented")]
     NotImplemented = 0,
@@ -26,9 +28,4 @@ pub enum ProtocolError {
 
     #[error("no such client")]
     NoSuchClient = 7,
-
-    #[error("reserved field")]
-    Reserved,
 }
-
-crate::impl_transmute!(ProtocolError);

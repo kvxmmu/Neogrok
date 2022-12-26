@@ -10,4 +10,6 @@ common = { path = "../common" }
 neogrok-compression = { path = "../neogrok-compression" }
 
 tokio = { workspace = true }
+
 thiserror = { workspace = true }
+integral-enum = { workspace = true }

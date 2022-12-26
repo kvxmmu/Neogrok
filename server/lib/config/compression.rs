@@ -1,3 +1,4 @@
+use integral_enum::IntegralEnum;
 use neogrok_protocol::{
     compression::algorithms::polymorphic::{
         BufCompressor,
@@ -7,11 +8,12 @@ use neogrok_protocol::{
 };
 use serde::Deserialize;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Deserialize, IntegralEnum)]
+#[repr(u8)]
 #[serde(rename_all = "snake_case")]
 pub enum CfgCompressionAlgorithm {
-    Deflate,
-    ZStd,
+    Deflate = 0,
+    ZStd = 1,
 }
 
 #[derive(Debug, Deserialize)]

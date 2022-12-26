@@ -13,7 +13,7 @@ macro_rules! impl_variants {
     };
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Compression {
     pub level: u8,
     pub algorithm: CompressionAlgorithm,
