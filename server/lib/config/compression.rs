@@ -9,7 +9,6 @@ use neogrok_protocol::{
 use serde::Deserialize;
 
 #[derive(Deserialize, IntegralEnum)]
-#[repr(u8)]
 #[serde(rename_all = "snake_case")]
 pub enum CfgCompressionAlgorithm {
     Deflate = 0,

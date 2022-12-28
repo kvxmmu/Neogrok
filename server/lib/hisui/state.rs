@@ -26,7 +26,6 @@ use crate::{
 };
 
 #[derive(IntegralEnum)]
-#[repr(u8)]
 pub enum SendResult {
     Ok = 0,
     NoSuchClient = 1,

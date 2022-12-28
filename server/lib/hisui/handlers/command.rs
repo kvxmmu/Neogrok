@@ -1,5 +1,6 @@
 use std::net::SocketAddr;
 
+use integral_enum::IntegralEnum;
 use neogrok_protocol::{
     compression::types::CompressionStrategy,
     hisui::writer::HisuiWriter,
@@ -12,10 +13,10 @@ use crate::{
 };
 
 #[must_use]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(IntegralEnum)]
 pub enum CommandHandleResult {
-    Terminate,
-    Ok,
+    Terminate = 0,
+    Ok = 1,
 }
 
 pub async fn handle_command<Writer>(
