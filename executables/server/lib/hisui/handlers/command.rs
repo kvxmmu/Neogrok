@@ -15,8 +15,8 @@ use crate::{
 #[must_use]
 #[derive(IntegralEnum)]
 pub enum CommandHandleResult {
-    Terminate = 0,
-    Ok = 1,
+    Terminate,
+    Ok,
 }
 
 pub async fn handle_command<Writer>(

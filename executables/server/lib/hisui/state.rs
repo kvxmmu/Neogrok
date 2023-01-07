@@ -27,9 +27,9 @@ use crate::{
 
 #[derive(IntegralEnum)]
 pub enum SendResult {
-    Ok = 0,
-    NoSuchClient = 1,
-    Closed = 2,
+    Ok,
+    NoSuchClient,
+    Closed,
 }
 
 pub struct State {

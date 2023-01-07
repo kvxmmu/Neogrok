@@ -2,7 +2,6 @@ use integral_enum::IntegralEnum;
 use thiserror::Error;
 
 #[derive(IntegralEnum, Error)]
-#[enum_disable(display)]
 pub enum ProtocolError {
     #[error("functionality currently is not implemented")]
     NotImplemented = 0,

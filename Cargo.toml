@@ -24,4 +24,4 @@ tokio = { version = "1.23.0", default-features = false, features = [
 ] }
 thiserror = "1.0.37"
 
-integral-enum = "1.1.2"
+integral-enum = "2.1.0"
