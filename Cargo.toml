@@ -3,7 +3,7 @@ opt-level = 3
 lto = true
 
 [workspace]
-members = ["packages/*", "server", "client"]
+members = ["packages/*", "executables/*"]
 
 [workspace.dependencies]
 tracing = "0.1.37"
