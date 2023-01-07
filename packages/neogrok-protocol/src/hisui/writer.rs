@@ -71,12 +71,15 @@ where
         server_name: &str,
         algorithm: CompressionAlgorithm,
         compression_level: u8,
+        buffer_size: u16,
     ) -> io::Result<()> {
         self.write_vectored(
             &[
                 just_type(Frame::PING),
                 algorithm as _,
                 compression_level,
+                (buffer_size & 0xff) as u8,
+                (buffer_size >> 8) as u8,
                 server_name.len() as u8,
             ],
             server_name.as_bytes(),

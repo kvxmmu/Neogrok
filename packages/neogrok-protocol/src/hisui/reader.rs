@@ -4,7 +4,7 @@ use std::{
         Future,
     },
     io,
-    num::NonZeroUsize,
+    num::NonZeroU16,
     pin::Pin,
 };
 
@@ -46,13 +46,19 @@ pub struct HisuiReader<Reader> {
     pub(crate) decompressor: BufDecompressor,
 }
 
+impl<Reader> HisuiReader<Reader> {
+    pub fn into_inner(self) -> (Reader, BufDecompressor) {
+        (self.inner, self.decompressor)
+    }
+}
+
 impl<Reader> HisuiReader<Reader>
 where
     Reader: AsyncReadExt + AsyncRead + Unpin,
 {
     pub async fn read_frame_inconcurrent(
         &mut self,
-        max_fwd_buffer: Option<NonZeroUsize>,
+        max_fwd_buffer: Option<NonZeroU16>,
     ) -> Result<Frame, ReadError> {
         let (pkt_type, flags) = self.read_packet_type().await?;
         self.read_frame(pkt_type, flags, max_fwd_buffer)
@@ -63,7 +69,7 @@ where
         &mut self,
         pkt_type: u8,
         flags: PacketFlags,
-        max_fwd_buffer: Option<NonZeroUsize>,
+        max_fwd_buffer: Option<NonZeroU16>,
     ) -> Result<Frame, ReadError> {
         Ok(match pkt_type {
             Frame::SERVER if self.side == CodecSide::Server => {
@@ -89,6 +95,7 @@ where
             Frame::PING if self.side == CodecSide::Client => {
                 Frame::PingResponse {
                     compression: self.read_compression_details().await?,
+                    buffer_size: self.inner.read_u16_le().await?,
                     server_name: self.read_string_prefixed().await?,
                 }
             }
@@ -102,7 +109,7 @@ where
                 let length = self.read_length(flags).await? as usize;
 
                 if let Some(max_length) = max_fwd_buffer {
-                    if length > max_length.get() {
+                    if length > max_length.get() as usize {
                         self.skip_n_bytes(length).await?;
                         return Err(ReadError::TooLongBuffer);
                     }
@@ -227,14 +234,14 @@ where
         &mut self,
         length: usize,
         flags: PacketFlags,
-        max_size: Option<NonZeroUsize>,
+        max_size: Option<NonZeroU16>,
     ) -> Result<Vec<u8>, ReadError> {
         let mut buffer = self.read_exact(length).await?;
 
         if flags.contains(PacketFlags::COMPRESSED) {
             match max_size {
                 Some(s) => {
-                    let max_size = s.get();
+                    let max_size = s.get() as usize;
                     buffer = self.try_decompress(&buffer, max_size)?;
                 }
 

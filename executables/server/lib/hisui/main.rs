@@ -1,6 +1,6 @@
 use std::{
     net::SocketAddr,
-    num::NonZeroUsize,
+    num::NonZeroU16,
     sync::Arc,
 };
 
@@ -36,7 +36,7 @@ pub async fn listen_hisui_client<Reader, Writer>(
     config: Arc<Config>,
     address: SocketAddr,
 
-    buffer_read: usize,
+    buffer_read: u16,
 ) where
     Reader: AsyncReadExt + Unpin,
     Writer: AsyncWriteExt + Unpin,
@@ -44,7 +44,7 @@ pub async fn listen_hisui_client<Reader, Writer>(
     let compression_data = &config.compression.default;
     let mut user = User::new(config.permissions.base.to_protocol_rights());
     let mut state: Option<State> = None;
-    let buffer_read = NonZeroUsize::new(buffer_read);
+    let buffer_read = NonZeroU16::new(buffer_read);
 
     async fn wait_command(
         state: &mut Option<State>,
@@ -116,6 +116,7 @@ pub async fn listen_hisui_client<Reader, Writer>(
                     &config,
                     &address,
                     compression_data,
+                    buffer_read.map(|i| i.get()).unwrap_or(u16::MAX),
                     &mut user,
                     &mut state,
                 ).await {

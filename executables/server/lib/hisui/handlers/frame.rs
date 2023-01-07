@@ -63,6 +63,7 @@ pub async fn handle_frame<Writer>(
     address: &SocketAddr,
 
     compression_data: &CompressionData,
+    buffer_size: u16,
     user: &mut User,
     state: &mut Option<State>,
 ) -> io::Result<()>
@@ -184,6 +185,7 @@ where
                     &config.server.name,
                     compression_data.algorithm.to_protocol(),
                     compression_data.level,
+                    buffer_size,
                 )
                 .await?;
         }

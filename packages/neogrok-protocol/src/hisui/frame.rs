@@ -32,6 +32,7 @@ pub enum Frame {
     PingRequest,
     PingResponse {
         server_name: String,
+        buffer_size: u16,
         compression: Compression,
     },
 

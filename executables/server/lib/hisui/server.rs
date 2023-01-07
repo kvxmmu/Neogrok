@@ -41,7 +41,16 @@ pub async fn listen_hisui(config: Arc<Config>) -> io::Result<()> {
         }
 
         let config = Arc::clone(&config);
-        let buffer_read = config.server.buffer.read;
+        let buffer_read: u16 =
+            if let Ok(u) = config.server.buffer.read.try_into() {
+                u
+            } else {
+                tracing::error!(
+                    "Read buffer doesen't fit in 16bit unsigned int, \
+                     falling back to the 4KB"
+                );
+                4096
+            };
 
         tokio::spawn(async move {
             let (reader, writer) = stream.split();
@@ -51,7 +60,7 @@ pub async fn listen_hisui(config: Arc<Config>) -> io::Result<()> {
                 writer,
                 comp,
                 decomp,
-                buffer_read,
+                (buffer_read as usize) + 5, // +5 for header
             );
 
             listen_hisui_client(reader, writer, config, addr, buffer_read)
